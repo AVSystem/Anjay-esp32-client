@@ -1,0 +1,3 @@
+[submodule "main/anjay"]
+	path = main/anjay
+	url = https://github.com/AVSystem/Anjay.git

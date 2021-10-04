@@ -1,0 +1,7 @@
+build
+build.zip
+.clang-format
+.vscode
+sdkconfig
+sdkconfig.old
+__pycache__
