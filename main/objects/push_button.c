@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,8 +124,8 @@ static const anjay_dm_object_def_t *OBJ_DEF_PTR = &OBJ_DEF;
 void push_button_object_release(const anjay_dm_object_def_t **def) {
     if (def) {
         push_button_object_t *obj = get_obj(def);
-        gpio_reset_pin(0);
-        gpio_isr_handler_remove(0);
+        gpio_reset_pin(CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN);
+        gpio_isr_handler_remove(CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN);
         gpio_uninstall_isr_service();
 
         avs_free(obj);
@@ -147,7 +147,7 @@ const anjay_dm_object_def_t **push_button_object_create(void) {
     obj->digital_input_state_last = false;
 
     gpio_config_t config = {
-        .pin_bit_mask = 1,
+        .pin_bit_mask = BIT64(CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN),
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = true,
         .pull_down_en = false,
@@ -155,9 +155,10 @@ const anjay_dm_object_def_t **push_button_object_create(void) {
     };
 
     if (gpio_config(&config) || gpio_install_isr_service(0)
-            || gpio_isr_handler_add(0, digital_input_state_changed, obj)) {
+            || gpio_isr_handler_add(CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN,
+                                    digital_input_state_changed, obj)) {
         push_button_object_release(&OBJ_DEF_PTR);
-        gpio_reset_pin(0);
+        gpio_reset_pin(CONFIG_ANJAY_CLIENT_PUSH_BUTTON_PIN);
         return NULL;
     }
 

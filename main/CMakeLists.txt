@@ -1,4 +1,4 @@
-# Copyright 2021 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,13 @@ idf_component_register(SRCS "main.c"
                             "objects/device.c"
                             "objects/light_control.c"
                             "objects/push_button.c"
+                            "objects/mpu6886.c"
+                            "objects/sensors.c"
+                            "st7789.c"
+                            "fontx.c"
+                            "lcd.c"
+                            "axp192.c"
+                            "i2c_wrapper.c"
                        INCLUDE_DIRS ".")
 
 file(GLOB_RECURSE ANJAY_SOURCES

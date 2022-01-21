@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"
 #include "protocol_examples_common.h"
+#include "sdkconfig.h"
 #include <string.h>
 
 #include "lwip/dns.h"
@@ -33,11 +34,13 @@
 
 #include <anjay/anjay.h>
 #include <anjay/attr_storage.h>
+#include <anjay/core.h>
 #include <anjay/security.h>
 #include <anjay/server.h>
 #include <avsystem/commons/avs_log.h>
 
 #include "default_config.h"
+#include "lcd.h"
 #include "objects/objects.h"
 
 static const anjay_dm_object_def_t **DEVICE_OBJ;
@@ -112,9 +115,48 @@ static void update_objects_job(avs_sched_t *sched, const void *anjay_ptr) {
 
     device_object_update(anjay, DEVICE_OBJ);
     push_button_object_update(anjay, PUSH_BUTTON_OBJ);
+    sensors_update(anjay);
 
     AVS_SCHED_DELAYED(sched, NULL, avs_time_duration_from_scalar(1, AVS_TIME_S),
                       update_objects_job, &anjay, sizeof(anjay));
+}
+
+#if CONFIG_ANJAY_CLIENT_LCD
+static void check_and_write_connection_status(anjay_t *anjay) {
+    if (NULL == anjay_get_socket_entries(anjay)) {
+        lcd_write_connection_status(STATUS_DISCONNECTED);
+    } else if (anjay_all_connections_failed(anjay)) {
+        lcd_write_connection_status(STATUS_CONNECTION_ERROR);
+    } else if (anjay_ongoing_registration_exists(anjay)) {
+        lcd_write_connection_status(STATUS_CONNECTING);
+    } else {
+        lcd_write_connection_status(STATUS_CONNECTED);
+    }
+}
+#endif /* CONFIG_ANJAY_CLIENT_LCD */
+
+static void update_connection_status_job(avs_sched_t *sched,
+                                         const void *anjay_ptr) {
+    anjay_t *anjay = *(anjay_t *const *) anjay_ptr;
+
+#if CONFIG_ANJAY_CLIENT_LCD
+    check_and_write_connection_status(anjay);
+#endif /* CONFIG_ANJAY_CLIENT_LCD */
+
+    static bool connected_prev = true;
+    wifi_ap_record_t ap_info;
+    esp_err_t ret = esp_wifi_sta_get_ap_info(&ap_info);
+
+    if (connected_prev && (ESP_OK != ret)) {
+        connected_prev = false;
+        anjay_transport_enter_offline(anjay, ANJAY_TRANSPORT_SET_UDP);
+    } else if (!connected_prev && (ESP_OK == ret)) {
+        anjay_transport_exit_offline(anjay, ANJAY_TRANSPORT_SET_UDP);
+        connected_prev = true;
+    }
+
+    AVS_SCHED_DELAYED(sched, NULL, avs_time_duration_from_scalar(1, AVS_TIME_S),
+                      update_connection_status_job, &anjay, sizeof(anjay));
 }
 
 static void anjay_task(void *pvParameters) {
@@ -152,10 +194,17 @@ static void anjay_task(void *pvParameters) {
         anjay_register_object(anjay, PUSH_BUTTON_OBJ);
     }
 
+    sensors_install(anjay);
+
+#if CONFIG_ANJAY_CLIENT_LCD
+    lcd_init();
+#endif /* CONFIG_ANJAY_CLIENT_LCD */
+
+    update_connection_status_job(anjay_get_scheduler(anjay), &anjay);
     update_objects_job(anjay_get_scheduler(anjay), &anjay);
     anjay_event_loop_run(anjay, avs_time_duration_from_scalar(1, AVS_TIME_S));
-
     anjay_delete(anjay);
+    sensors_release();
 }
 
 static void

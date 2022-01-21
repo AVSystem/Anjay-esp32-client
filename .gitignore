@@ -1,6 +1,5 @@
 build
 build.zip
-.clang-format
 .vscode
 sdkconfig
 sdkconfig.old

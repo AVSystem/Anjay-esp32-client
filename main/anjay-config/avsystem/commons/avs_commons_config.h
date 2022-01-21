@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,6 +258,16 @@
 #define AVS_COMMONS_WITH_MBEDTLS
 /* #undef AVS_COMMONS_WITH_OPENSSL */
 /* #undef AVS_COMMONS_WITH_TINYDTLS */
+
+/**
+ * Enable support for custom TLS socket implementation.
+ *
+ * If enabled, the user needs to provide their own implementations of
+ * <c>_avs_net_create_ssl_socket()</c>, <c>_avs_net_create_dtls_socket()</c>,
+ * <c>_avs_net_initialize_global_ssl_state() and
+ * <c>_avs_net_cleanup_global_ssl_state()</c>.
+ */
+/* #undef AVS_COMMONS_WITH_CUSTOM_TLS */
 /**@}*/
 
 /**
@@ -266,7 +276,8 @@
 /**@{*/
 /**
  * Enable AEAD and HKDF support in avs_crypto. Requires MbedTLS in version at
- * least 2.14.0 or OpenSSL in version at least 1.1.0.
+ * least 2.14.0, OpenSSL in version at least 1.1.0, or custom implementation in
+ * case of <c>AVS_COMMONS_WITH_CUSTOM_TLS</c>.
  */
 /* #undef AVS_COMMONS_WITH_AVS_CRYPTO_ADVANCED_FEATURES */
 
@@ -280,6 +291,18 @@
  * also enabled.
  */
 #define AVS_COMMONS_WITH_AVS_CRYPTO_PKI
+
+/**
+ * If the TLS backend is either mbed TLS, OpenSSL or TinyDTLS, enables support
+ * of pre-shared key security.
+ *
+ * PSK is the only supported security mode for the TinyDTLS backend, so this
+ * option MUST be enabled to utilize it.
+ *
+ * It also enables support for pre-shared key security in avs_net, if that
+ * module is also enabled.
+ */
+#define AVS_COMMONS_WITH_AVS_CRYPTO_PSK
 
 /**
  * Enables usage of Valgrind API to suppress some of the false positives
@@ -315,7 +338,7 @@
  *   - <c>_avs_crypto_openssl_engine_load_crls()</c>
  *   - <c>_avs_crypto_openssl_engine_load_private_key()</c>
  *
- * External engines are supported only in OpenSSL and Mbed TLS backends.
+ * External engines are NOT supported in the TinyDTLS backend.
  */
 /* #undef AVS_COMMONS_WITH_AVS_CRYPTO_ENGINE */
 
@@ -545,14 +568,6 @@
  * lwIP and Winsock are currently supported for this scenario.
  */
 #define AVS_COMMONS_NET_WITH_POSIX_AVS_SOCKET
-
-/**
- * If the TLS backend is either mbed TLS or OpenSSL, enables support of
- * pre-shared key security.
- *
- * PSK is the only supported security mode for the TinyDTLS backend.
- */
-#define AVS_COMMONS_NET_WITH_PSK
 
 /**
  * Enables support for logging socket communication to file.

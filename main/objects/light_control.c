@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,9 @@ static int rgb_led_set(light_control_instance_t *inst) {
                                : inst->power == 100
                                          ? MAX_DUTY
                                          : inst->power * MAX_DUTY / 100;
+#    ifdef CONFIG_ANJAY_CLIENT_LIGHT_CONTROL_ACTIVE_LOW
+    real_power = MAX_DUTY - real_power;
+#    endif // CONFIG_ANJAY_CLIENT_LIGHT_CONTROL_ACTIVE_LOW
 
     if (ledc_set_duty(LEDC_LOW_SPEED_MODE, inst->channel, real_power)
             || ledc_update_duty(LEDC_LOW_SPEED_MODE, inst->channel)) {

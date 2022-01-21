@@ -1,4 +1,4 @@
-# Copyright 2021 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,3 +22,4 @@ PROJECT_NAME := anjay-esp32-client
 EXTRA_COMPONENT_DIRS = $(IDF_PATH)/examples/common_components/protocol_examples_common
 
 include $(IDF_PATH)/make/project.mk
+

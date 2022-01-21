@@ -1,4 +1,4 @@
-# Copyright 2021 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ menu "anjay-esp32-client"
 
             config ANJAY_CLIENT_BOARD_ESP32_DEVKITC
                 bool "ESP32-DevKitC and derivatives"
+                
+            config ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+                bool "M5StickC-Plus"
         endif
 
         config ANJAY_CLIENT_BOARD_UNKNOWN
@@ -36,23 +39,27 @@ menu "anjay-esp32-client"
             string "Device manufacturer"
             default "Espressif" if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
             default "Espressif" if ANJAY_CLIENT_BOARD_ESP32_DEVKITC
+            default "M5Stack" if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
             default "Unknown"
 
         config ANJAY_CLIENT_MODEL_NUMBER
             string "Model number"
             default "ESP-WROVER-KIT" if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
             default "ESP32-DevKitC" if ANJAY_CLIENT_BOARD_ESP32_DEVKITC
+            default "M5StickC-Plus" if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
             default "Unknown"
 
         config ANJAY_CLIENT_PUSH_BUTTON
             bool "Push button enabled"
             default y if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
             default y if ANJAY_CLIENT_BOARD_ESP32_DEVKITC
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
             default n
 
         config ANJAY_CLIENT_LIGHT_CONTROL
             bool "Light control enabled"
             default y if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
             default n
 
         if ANJAY_CLIENT_PUSH_BUTTON
@@ -60,14 +67,36 @@ menu "anjay-esp32-client"
                 int "Push button pin"
                 default 0 if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
                 default 0 if ANJAY_CLIENT_BOARD_ESP32_DEVKITC
+                default 37 if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
                 default 0
         endif
+
+        config ANJAY_CLIENT_ACCELEROMETER_AVAILABLE
+            bool "Accelerometer available"
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+            default n
+
+        config ANJAY_CLIENT_GYROSCOPE_AVAILABLE
+            bool "Gyroscope available"
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+            default n
+
+        config ANJAY_CLIENT_TEMPERATURE_SENSOR_AVAILABLE
+            bool "Temperature sensor available"
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+            default n
+
+        config ANJAY_CLIENT_LCD
+            bool "LCD is mounted on board"
+            default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+            default n
 
         menu "Light control options"
             visible if ANJAY_CLIENT_LIGHT_CONTROL
 
             config ANJAY_CLIENT_LIGHT_CONTROL_RED
                 bool "Enable red color"
+                default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
                 default n
 
             config ANJAY_CLIENT_LIGHT_CONTROL_GREEN
@@ -80,9 +109,15 @@ menu "anjay-esp32-client"
                 default y if ANJAY_CLIENT_BOARD_ESP_WROVER_KIT
                 default n
 
+            config ANJAY_CLIENT_LIGHT_CONTROL_ACTIVE_LOW
+                bool "LED connection config - pin is on the cathode side"
+                default y if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
+                default n
+
             if ANJAY_CLIENT_LIGHT_CONTROL_RED
                 config ANJAY_CLIENT_LIGHT_CONTROL_RED_PIN
                     int "Red color pin"
+                    default 10 if ANJAY_CLIENT_BOARD_M5STICKC_PLUS
                     default 0
             endif
 

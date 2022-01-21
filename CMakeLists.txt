@@ -1,4 +1,4 @@
-# Copyright 2021 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,3 +24,10 @@ set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/protocol_exam
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(anjay-esp32-client)
+
+if(CONFIG_PARTITION_TABLE_CUSTOM)
+    if(CONFIG_PARTITION_TABLE_CUSTOM_FILENAME STREQUAL "m5stickc-plus-partitions.csv")
+        spiffs_create_partition_image(storage graphics FLASH_IN_PROJECT)
+    endif()
+endif()
+
