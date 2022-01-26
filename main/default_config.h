@@ -18,6 +18,6 @@
 
 #include <avsystem/commons/avs_log.h>
 
-#define CLIENT_VERSION "22.01"
+#define CLIENT_VERSION "22.01.1"
 
 #define DEFAULT_LOG_LEVEL AVS_LOG_INFO
