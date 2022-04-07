@@ -255,7 +255,9 @@
  * TinyDTLS support is only rudimentary.
  */
 /**@{*/
+#if CONFIG_MBEDTLS_SSL_PROTO_DTLS
 #define AVS_COMMONS_WITH_MBEDTLS
+#endif
 /* #undef AVS_COMMONS_WITH_OPENSSL */
 /* #undef AVS_COMMONS_WITH_TINYDTLS */
 
@@ -529,7 +531,9 @@
  * At least one of AVS_COMMONS_NET_WITH_IPV4 and AVS_COMMONS_NET_WITH_IPV6
  * MUST be defined if avs_net is enabled.
  */
+#if CONFIG_LWIP_IPV6
 #define AVS_COMMONS_NET_WITH_IPV6
+#endif
 
 /**
  * If the TLS backend is set to OpenSSL, enables support for DTLS.
