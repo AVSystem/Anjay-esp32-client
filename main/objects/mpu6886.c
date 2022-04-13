@@ -137,9 +137,9 @@ static i2c_device_t mpu6886_device = {
 
 int accelerometer_read_data(void) {
     uint8_t acc[6];
-    if ((ESP_OK
-         == i2c_master_read_slave_reg(&mpu6886_device,
-                                      MPU6886_REG_ADDR_ACCEL_XOUT_H, acc, 6))
+    if ((i2c_master_read_slave_reg(&mpu6886_device,
+                                   MPU6886_REG_ADDR_ACCEL_XOUT_H, acc, 6)
+         == ESP_OK)
             || !MUTEX_IS_LOCKED(accelerometer_data)) {
         MUTEX_LOCK(accelerometer_data);
         accelerometer_data.x_value =
@@ -173,9 +173,9 @@ int accelerometer_get_data(three_axis_sensor_data_t *sensor_data) {
 
 int temperature_read_data(void) {
     uint8_t temp[2];
-    if ((ESP_OK
-         == i2c_master_read_slave_reg(&mpu6886_device,
-                                      MPU6886_REG_ADDR_TEMP_OUT_H, temp, 2))
+    if ((i2c_master_read_slave_reg(&mpu6886_device, MPU6886_REG_ADDR_TEMP_OUT_H,
+                                   temp, 2)
+         == ESP_OK)
             || !MUTEX_IS_LOCKED(temperature_sensor_data)) {
         MUTEX_LOCK(temperature_sensor_data);
         temperature_sensor_data.value =
@@ -202,9 +202,9 @@ int temperature_get_data(double *sensor_data) {
 
 int gyroscope_read_data(void) {
     uint8_t dps[6];
-    if ((ESP_OK
-         == i2c_master_read_slave_reg(&mpu6886_device,
-                                      MPU6886_REG_ADDR_GYRO_XOUT_H, dps, 6))
+    if ((i2c_master_read_slave_reg(&mpu6886_device,
+                                   MPU6886_REG_ADDR_GYRO_XOUT_H, dps, 6)
+         == ESP_OK)
             || !MUTEX_IS_LOCKED(gyroscope_data)) {
         MUTEX_LOCK(gyroscope_data);
         gyroscope_data.x_value = ((double) (int16_t) ((dps[0] << 8) | dps[1]))

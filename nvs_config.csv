@@ -1,0 +1,12 @@
+key,type,encoding,value
+config,namespace,,
+wifi_ssid,data,string,[wifi_ssid]
+wifi_pswd,data,string,[wifi_password]
+wifi_inter_en,data,u8,1
+identity,data,string,[identity]
+psk,data,string,[psk]
+uri,data,string,[lwm2m_server_uri]
+writable_wifi,namespace,,
+wifi_ssid,data,string,[wifi_ssid]
+wifi_pswd,data,string,[wifi_password]
+wifi_inter_en,data,u8,0

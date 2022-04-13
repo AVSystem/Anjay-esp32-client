@@ -83,7 +83,8 @@ static FontxFile fx32M[2];
 static bool spiffs_opened_properly = false;
 
 static const char *connection_status_texts[] = {
-    "disconnected", "connection error", "connecting", "connected", "unknown"
+    "disconnected",    "connection error", "connecting", "connected",
+    "WiFi Connecting", "WiFi Connected",   "unknown"
 };
 
 static void open_SPIFFS_directory(char *path) {

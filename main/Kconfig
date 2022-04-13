@@ -23,7 +23,7 @@ menu "anjay-esp32-client"
 
             config ANJAY_CLIENT_BOARD_ESP32_DEVKITC
                 bool "ESP32-DevKitC and derivatives"
-                
+
             config ANJAY_CLIENT_BOARD_M5STICKC_PLUS
                 bool "M5StickC-Plus"
         endif
@@ -153,5 +153,37 @@ menu "anjay-esp32-client"
         config ANJAY_CLIENT_PSK_KEY
             string "PSK key"
             default "1234"
+    endmenu
+
+    menu "Connection configuration"
+        config ANJAY_WIFI_SSID
+            string "WiFi SSID"
+            default "myssid"
+
+        config ANJAY_WIFI_PASSWORD
+            string "WiFi Password"
+            default "mypassword"
+
+        config ANJAY_WIFI_CONNECT_IPV6
+            bool "Obtain IPv6 address"
+            default y
+
+        choice ANJAY_WIFI_CONNECT_IPV6_PREF
+            depends on ANJAY_WIFI_CONNECT_IPV6
+            prompt "Preferred IPv6 Type"
+            default ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+
+            config ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+                bool "Local Link Address"
+
+            config ANJAY_WIFI_CONNECT_IPV6_PREF_GLOBAL
+                bool "Global Address"
+
+            config ANJAY_WIFI_CONNECT_IPV6_PREF_SITE_LOCAL
+                bool "Site Local Address"
+
+            config ANJAY_WIFI_CONNECT_IPV6_PREF_UNIQUE_LOCAL
+                bool "Unique Local Link Address"
+        endchoice
     endmenu
 endmenu

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FIRMWARE_UPDATE_H
+#define FIRMWARE_UPDATE_H
 
-#include <avsystem/commons/avs_log.h>
+#include <anjay/anjay.h>
+#include <anjay/fw_update.h>
+#include <stdatomic.h>
 
-#define CLIENT_VERSION "22.01.1"
+int fw_update_install(anjay_t *anjay);
+bool fw_update_requested(void);
+void fw_update_reboot(void);
 
-#define DEFAULT_LOG_LEVEL AVS_LOG_INFO
+#endif // FIRMWARE_UPDATE_H

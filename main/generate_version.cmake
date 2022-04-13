@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#
-# Compiler options
-#
-CONFIG_COMPILER_OPTIMIZATION_SIZE=y
-
-#
-# mbedTLS
-#
-CONFIG_MBEDTLS_PSK_MODES=y
-CONFIG_MBEDTLS_KEY_EXCHANGE_PSK=y
-CONFIG_MBEDTLS_SSL_PROTO_DTLS=y
-
-CONFIG_PARTITION_TABLE_CUSTOM=y
-
-CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
-CONFIG_ESPTOOLPY_FLASHSIZE="4MB"
+# Git executable is extracted from parameters.
+execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always
+                RESULT_VARIABLE GIT_DESCRIBE_RESULT
+                OUTPUT_VARIABLE GIT_REPO_VERSION_S)
+if(GIT_DESCRIBE_RESULT EQUAL 0)
+    string(STRIP "${GIT_REPO_VERSION_S}" GIT_REPO_VERSION)
+else()
+    set(GIT_REPO_VERSION "22.04")
+endif()
+# Input and output files are extracted from parameters.
+configure_file(${INPUT_FILE} ${OUTPUT_FILE})

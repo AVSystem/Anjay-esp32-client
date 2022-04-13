@@ -91,38 +91,38 @@ int spi_master_init(TFT_t *dev,
                     int16_t GPIO_BL) {
     if (GPIO_CS >= 0) {
         gpio_pad_select_gpio(GPIO_CS);
-        if (ESP_OK != gpio_set_direction(GPIO_CS, GPIO_MODE_OUTPUT)) {
+        if (gpio_set_direction(GPIO_CS, GPIO_MODE_OUTPUT) != ESP_OK) {
             return -1;
         }
-        if (ESP_OK != gpio_set_level(GPIO_CS, 0)) {
+        if (gpio_set_level(GPIO_CS, 0) != ESP_OK) {
             return -1;
         }
     }
 
     if (GPIO_DC >= 0) {
         gpio_pad_select_gpio(GPIO_DC);
-        if (ESP_OK != gpio_set_direction(GPIO_DC, GPIO_MODE_OUTPUT)) {
+        if (gpio_set_direction(GPIO_DC, GPIO_MODE_OUTPUT) != ESP_OK) {
             return -1;
         }
-        if (ESP_OK != gpio_set_level(GPIO_DC, 0)) {
+        if (gpio_set_level(GPIO_DC, 0) != ESP_OK) {
             return -1;
         }
     }
 
     if (GPIO_RESET >= 0) {
         gpio_pad_select_gpio(GPIO_RESET);
-        if (ESP_OK != gpio_set_direction(GPIO_RESET, GPIO_MODE_OUTPUT)) {
+        if (gpio_set_direction(GPIO_RESET, GPIO_MODE_OUTPUT) != ESP_OK) {
             return -1;
         }
-        if (ESP_OK != gpio_set_level(GPIO_RESET, 1)) {
-            return -1;
-        }
-        delayMS(50);
-        if (ESP_OK != gpio_set_level(GPIO_RESET, 0)) {
+        if (gpio_set_level(GPIO_RESET, 1) != ESP_OK) {
             return -1;
         }
         delayMS(50);
-        if (ESP_OK != gpio_set_level(GPIO_RESET, 1)) {
+        if (gpio_set_level(GPIO_RESET, 0) != ESP_OK) {
+            return -1;
+        }
+        delayMS(50);
+        if (gpio_set_level(GPIO_RESET, 1) != ESP_OK) {
             return -1;
         }
         delayMS(50);
@@ -130,10 +130,10 @@ int spi_master_init(TFT_t *dev,
 
     if (GPIO_BL >= 0) {
         gpio_pad_select_gpio(GPIO_BL);
-        if (ESP_OK != gpio_set_direction(GPIO_BL, GPIO_MODE_OUTPUT)) {
+        if (gpio_set_direction(GPIO_BL, GPIO_MODE_OUTPUT) != ESP_OK) {
             return -1;
         }
-        if (ESP_OK != gpio_set_level(GPIO_BL, 0)) {
+        if (gpio_set_level(GPIO_BL, 0) != ESP_OK) {
             return -1;
         }
     }
@@ -146,7 +146,7 @@ int spi_master_init(TFT_t *dev,
         .quadhd_io_num = -1
     };
 
-    if (ESP_OK != spi_bus_initialize(HSPI_HOST, &buscfg, 1)) {
+    if (spi_bus_initialize(HSPI_HOST, &buscfg, 1) != ESP_OK) {
         return -1;
     }
 
@@ -164,7 +164,7 @@ int spi_master_init(TFT_t *dev,
     }
 
     spi_device_handle_t handle;
-    if (ESP_OK != spi_bus_add_device(HSPI_HOST, &devcfg, &handle)) {
+    if (spi_bus_add_device(HSPI_HOST, &devcfg, &handle) != ESP_OK) {
         return -1;
     }
     dev->_dc = GPIO_DC;
@@ -183,7 +183,7 @@ bool spi_master_write_byte(spi_device_handle_t SPIHandle,
         memset(&SPITransaction, 0, sizeof(spi_transaction_t));
         SPITransaction.length = DataLength * 8;
         SPITransaction.tx_buffer = Data;
-        if (ESP_OK != spi_device_transmit(SPIHandle, &SPITransaction)) {
+        if (spi_device_transmit(SPIHandle, &SPITransaction) != ESP_OK) {
             return false;
         }
     }
@@ -194,7 +194,7 @@ bool spi_master_write_byte(spi_device_handle_t SPIHandle,
 bool spi_master_write_command(TFT_t *dev, uint8_t cmd) {
     static uint8_t Byte = 0;
     Byte = cmd;
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Command_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Command_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, &Byte, 1);
     } else {
         return false;
@@ -204,7 +204,7 @@ bool spi_master_write_command(TFT_t *dev, uint8_t cmd) {
 bool spi_master_write_data_byte(TFT_t *dev, uint8_t data) {
     static uint8_t Byte = 0;
     Byte = data;
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Data_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Data_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, &Byte, 1);
     } else {
         return false;
@@ -215,7 +215,7 @@ bool spi_master_write_data_word(TFT_t *dev, uint16_t data) {
     static uint8_t Byte[2];
     Byte[0] = (data >> 8) & 0xFF;
     Byte[1] = data & 0xFF;
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Data_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Data_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, Byte, 2);
     } else {
         return false;
@@ -228,7 +228,7 @@ bool spi_master_write_addr(TFT_t *dev, uint16_t addr1, uint16_t addr2) {
     Byte[1] = addr1 & 0xFF;
     Byte[2] = (addr2 >> 8) & 0xFF;
     Byte[3] = addr2 & 0xFF;
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Data_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Data_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, Byte, 4);
     } else {
         return false;
@@ -242,7 +242,7 @@ bool spi_master_write_color(TFT_t *dev, uint16_t color, uint16_t size) {
         Byte[index++] = (color >> 8) & 0xFF;
         Byte[index++] = color & 0xFF;
     }
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Data_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Data_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, Byte, size * 2);
     } else {
         return false;
@@ -257,7 +257,7 @@ bool spi_master_write_colors(TFT_t *dev, uint16_t *colors, uint16_t size) {
         Byte[index++] = (colors[i] >> 8) & 0xFF;
         Byte[index++] = colors[i] & 0xFF;
     }
-    if (ESP_OK == gpio_set_level(dev->_dc, SPI_Data_Mode)) {
+    if (gpio_set_level(dev->_dc, SPI_Data_Mode) == ESP_OK) {
         return spi_master_write_byte(dev->_SPIHandle, Byte, size * 2);
     } else {
         return false;

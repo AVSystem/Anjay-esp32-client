@@ -13,17 +13,20 @@
 # limitations under the License.
 
 idf_component_register(SRCS "main.c"
+                            "connect.c"
                             "utils.c"
                             "objects/device.c"
                             "objects/light_control.c"
                             "objects/push_button.c"
                             "objects/mpu6886.c"
                             "objects/sensors.c"
+                            "objects/wlan.c"
                             "st7789.c"
                             "fontx.c"
                             "lcd.c"
                             "axp192.c"
                             "i2c_wrapper.c"
+                            "firmware_update.c"
                        INCLUDE_DIRS ".")
 
 file(GLOB_RECURSE ANJAY_SOURCES
@@ -51,4 +54,14 @@ target_link_libraries(anjay PRIVATE idf::mbedtls)
 # We disable assertions within anjay to work around that.
 target_compile_definitions(anjay PRIVATE NDEBUG)
 
+
+add_custom_target( configure_git_version
+    COMMAND ${CMAKE_COMMAND}
+        -D GIT_EXECUTABLE=${GIT_EXECUTABLE}
+        -D INPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/default_config.h.in
+        -D OUTPUT_FILE=${CMAKE_CURRENT_SOURCE_DIR}/default_config.h
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/generate_version.cmake
+)
+
+add_dependencies(${COMPONENT_LIB} configure_git_version)
 target_link_libraries(${COMPONENT_LIB} PRIVATE anjay)

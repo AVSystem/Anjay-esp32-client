@@ -4,3 +4,4 @@ build.zip
 sdkconfig
 sdkconfig.old
 __pycache__
+main/default_config.h

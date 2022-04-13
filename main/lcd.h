@@ -51,8 +51,10 @@
 #    define STATUS_CONNECTION_ERROR ((uint8_t) 1)
 #    define STATUS_CONNECTING ((uint8_t) 2)
 #    define STATUS_CONNECTED ((uint8_t) 3)
-#    define STATUS_UNKNOWN ((uint8_t) 4)
-#    define STATUS_NUMBER_OF_DEFS ((uint8_t) 5)
+#    define STATUS_WIFI_CONNECTING ((uint8_t) 4)
+#    define STATUS_WIFI_CONNECTED ((uint8_t) 5)
+#    define STATUS_UNKNOWN ((uint8_t) 6)
+#    define STATUS_NUMBER_OF_DEFS ((uint8_t) 7)
 
 void lcd_init(void);
 void lcd_write_connection_status(uint8_t status);
