@@ -15,11 +15,11 @@
 # Git executable is extracted from parameters.
 execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always
                 RESULT_VARIABLE GIT_DESCRIBE_RESULT
-                OUTPUT_VARIABLE GIT_REPO_VERSION_S)
+                OUTPUT_VARIABLE CLIENT_VERSION_S)
 if(GIT_DESCRIBE_RESULT EQUAL 0)
-    string(STRIP "${GIT_REPO_VERSION_S}" GIT_REPO_VERSION)
+    string(STRIP "${CLIENT_VERSION_S}" CLIENT_VERSION)
 else()
-    set(GIT_REPO_VERSION "22.04")
+    set(CLIENT_VERSION "22.04.1")
 endif()
 # Input and output files are extracted from parameters.
-configure_file(${INPUT_FILE} ${OUTPUT_FILE})
+configure_file("${INPUT_FILE}" "${OUTPUT_FILE}" @ONLY)

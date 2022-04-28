@@ -17,6 +17,8 @@
 #ifndef AVS_COMMONS_CONFIG_H
 #define AVS_COMMONS_CONFIG_H
 
+#include <sdkconfig.h>
+
 /**
  * @file avs_commons_config.h
  *

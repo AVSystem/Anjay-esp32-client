@@ -18,6 +18,6 @@
 
 #include <avsystem/commons/avs_log.h>
 
-#define CLIENT_VERSION "${GIT_REPO_VERSION}"
+#define CLIENT_VERSION "@CLIENT_VERSION@"
 
 #define DEFAULT_LOG_LEVEL AVS_LOG_INFO

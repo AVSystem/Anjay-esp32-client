@@ -44,7 +44,7 @@ To do that, `esptool.py` is required, which can be installed running `pip instal
 
 ### Creating a merged binary for M5StickC-Plus
 ```
-esptool.py --chip esp32  merge_bin --flash_mode dio --flash_size 2MB --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/anjay-esp32-client.bin 0x110000 build/storage.bin --output m5stickc-plus.bin
+esptool.py --chip esp32  merge_bin --flash_mode dio --flash_size 4MB --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/anjay-esp32-client.bin 0x210000 build/storage.bin --output m5stickc-plus.bin
 ```
 ### NVS config file
 To generate NVS partition, create a `nvs_config.csv` file with following content:
@@ -74,6 +74,11 @@ esptool.py -b 750000 --chip esp32 write_flash 0x0000 m5stickc-plus.bin
 esptool.py -b 750000 --chip esp32 write_flash 0x9000 nvs_config.bin
 ```
 Device will be reset and run with provided configuration.
+### FOTA
+After compilation, you can perform FOTA with Coiote DM. Required binary file location:
+```
+$PROJECT_DIR/build/anjay-esp32-client/build/anjay-esp32-client.bin
+```
 ## Links
 * [Anjay source repository](https://github.com/AVSystem/Anjay)
 * [Anjay documentation](https://avsystem.github.io/Anjay-doc/index.html)

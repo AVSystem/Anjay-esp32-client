@@ -17,6 +17,8 @@
 #ifndef AVS_COAP_CONFIG_H
 #define AVS_COAP_CONFIG_H
 
+#include <sdkconfig.h>
+
 /**
  * @file avs_coap_config.h
  *

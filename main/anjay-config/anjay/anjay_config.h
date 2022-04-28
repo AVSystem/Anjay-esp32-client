@@ -17,6 +17,8 @@
 #ifndef ANJAY_CONFIG_H
 #define ANJAY_CONFIG_H
 
+#include <sdkconfig.h>
+
 /**
  * @file anjay_config.h
  *
