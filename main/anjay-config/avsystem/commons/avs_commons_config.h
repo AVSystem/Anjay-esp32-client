@@ -12,6 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef AVS_COMMONS_CONFIG_H
@@ -320,11 +332,11 @@
  *
  * Requires @ref AVS_COMMONS_WITH_AVS_CRYPTO_PKI to be enabled.
  *
- * An actual implementation is required to use this feature. In the commercial
- * version, you may use one of the default ones (see
- * @ref AVS_COMMONS_WITH_MBEDTLS_PKCS11_ENGINE,
+ * An actual implementation is required to use this feature. You may provide
+ * your own, or use one of the default ones that come with the HSM engine
+ * commercial feature (see @ref AVS_COMMONS_WITH_MBEDTLS_PKCS11_ENGINE,
  * @ref AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE and
- * @ref AVS_COMMONS_WITH_OPENSSL_PKCS11_ENGINE) or provide your own.
+ * @ref AVS_COMMONS_WITH_OPENSSL_PKCS11_ENGINE).
  *
  * The functions that need to be provided in case of a custom implementation:
  * - <c>avs_crypto_pki_engine_certificate_rm()</c>
@@ -355,9 +367,9 @@
  *
  * Requires @ref AVS_COMMONS_WITH_AVS_CRYPTO_PKI to be enabled.
  *
- * An actual implementation is required to use this feature. In the commercial
- * version, you may use the default PSA-based one (see
- * @ref AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE) or provide your own.
+ * An actual implementation is required to use this feature. You may provide
+ * your own, or use the default PSA-based one that comes with the HSM engine
+ * commercial feature (see @ref AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE).
  *
  * The functions that need to be provided in case of a custom implementation:
  * - <c>avs_crypto_psk_engine_identity_store()</c>
@@ -386,8 +398,8 @@
  * NOTE: The unit tests for this feature depend on SoftHSM and pkcs11-tool.
  * These must be installed for the tests to pass.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the HSM support commercial feature.
+ * Ignored in the open source version.
  */
 /* #undef AVS_COMMONS_WITH_MBEDTLS_PKCS11_ENGINE */
 
@@ -416,8 +428,8 @@
  * @ref AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE_PROTECTED_STORAGE is enabled, by
  * using the <c>uid=...</c> syntax.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the HSM support commercial feature.
+ * Ignored in the open source version.
  */
 /* #undef AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE */
 
@@ -427,8 +439,8 @@
  *
  * Requires @ref AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE to be enabled.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the HSM support commercial feature.
+ * Ignored in the open source version.
  */
 /* #undef AVS_COMMONS_WITH_MBEDTLS_PSA_ENGINE_PROTECTED_STORAGE */
 
@@ -460,8 +472,8 @@
  * NOTE: The unit tests for this feature depend on SoftHSM and pkcs11-tool.
  * These must be installed for the tests to pass.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the HSM support commercial feature.
+ * Ignored in the open source version.
  */
 /* #undef AVS_COMMONS_WITH_OPENSSL_PKCS11_ENGINE */
 /**@}*/

@@ -54,6 +54,7 @@ config,namespace,,
 wifi_ssid,data,string,[wifi_ssid]
 wifi_pswd,data,string,[wifi_password]
 wifi_inter_en,data,u8,1
+endpoint_name,data,string,[endpoint_name]
 identity,data,string,[identity]
 psk,data,string,[psk]
 uri,data,string,[lwm2m_server_uri]
@@ -62,7 +63,7 @@ wifi_ssid,data,string,[wifi_ssid]
 wifi_pswd,data,string,[wifi_password]
 wifi_inter_en,data,u8,0
 ```
-And fill proper values for `[wifi_ssid]`, `[wifi_password]`, `[identity]`, `[psk]`, `[lwm2m_server_uri]`.
+And fill proper values for `[wifi_ssid]`, `[wifi_password]`, `[endpoint_name]`, `[identity]`, `[psk]`, `[lwm2m_server_uri]`.
 After that create config partition by running:
 ```
 python3 $IDF_PATH/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py generate nvs_config.csv nvs_config.bin 0x4000
@@ -74,6 +75,14 @@ esptool.py -b 750000 --chip esp32 write_flash 0x0000 m5stickc-plus.bin
 esptool.py -b 750000 --chip esp32 write_flash 0x9000 nvs_config.bin
 ```
 Device will be reset and run with provided configuration.
+### TCP socket
+To switch to TCP socket instead of UDP run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose socket` and select TCP (remember that you must also provide a proper URI in the `nvs_config.csv` file, e.g. `coaps+tcp://try-anjay.avsystem.com:5684`). NOTE: Coiote DM currently only supports the Certificate mode when using TCP and TLS.
+### ESP32 with certificates
+1. Prepare your certificates. All certificates should have a `.der` extension and should be added to the directory where this `README.md` file is located. The names of the certificates should be as follows:
+   * client public certificate - `client_cert.der`
+   * client private certificate - `client_key.der`
+   * server public certificate - `server_cert.der`
+2. Run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose security mode` and select `Certificates`.
 ### FOTA
 After compilation, you can perform FOTA with Coiote DM. Required binary file location:
 ```

@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Licensed under the AVSystem-5-clause License.
+ * See the attached LICENSE file for details.
  */
 
 #ifndef AVS_COAP_CONFIG_H
@@ -95,25 +98,22 @@
  * Enable support for UDP transport.
  *
  * NOTE: Enabling at least one transport is necessary for the library to be
- * useful. UDP is the only transport available in the open source version.
+ * useful.
  */
 #define WITH_AVS_COAP_UDP
 
 /**
  * Enable support for TCP transport (RFC 8323).
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
- *
  * NOTE: Enabling at least one transport is necessary for the library to be
  * useful.
  */
-/* #undef WITH_AVS_COAP_TCP */
+#define WITH_AVS_COAP_TCP
 
 /**
  * Enable support for OSCORE (RFC 8613).
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
+ * IMPORTANT: Only available with the OSCORE feature. Ignored in the open
  * source version.
  */
 /* #undef WITH_AVS_COAP_OSCORE */
@@ -124,7 +124,7 @@
  *
  * Only meaningful if <c>WITH_AVS_COAP_OSCORE</c> is enabled.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
+ * IMPORTANT: Only available with the OSCORE feature. Ignored in the open
  * source version.
  */
 /* #undef WITH_AVS_COAP_OSCORE_DRAFT_8 */

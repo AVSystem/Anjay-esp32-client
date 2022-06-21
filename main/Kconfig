@@ -146,13 +146,42 @@ menu "anjay-esp32-client"
             string "Server URI"
             default "coaps://try-anjay.avsystem.com:5684"
 
-        config ANJAY_CLIENT_PSK_IDENTITY
-            string "PSK identity"
-            default ANJAY_CLIENT_ENDPOINT_NAME
+        choice ANJAY_CLIENT_SOCKET
+        prompt "Choose socket"
+            default ANJAY_CLIENT_SOCKET_UDP
 
-        config ANJAY_CLIENT_PSK_KEY
-            string "PSK key"
-            default "1234"
+            config ANJAY_CLIENT_SOCKET_UDP
+                bool "UDP"
+
+            config ANJAY_CLIENT_SOCKET_TCP
+                bool "TCP"
+        endchoice
+
+        choice ANJAY_SECURITY_MODE
+        prompt "Choose security mode"
+            default ANJAY_SECURITY_MODE_PSK
+
+            config ANJAY_SECURITY_MODE_NOSEC
+                bool "Non-secure connection"
+
+            config ANJAY_SECURITY_MODE_PSK
+                bool "PSK"
+
+            config ANJAY_SECURITY_MODE_CERTIFICATES
+                bool "Certificates"
+        endchoice
+
+        menu "PSK configuration"
+            visible if ANJAY_SECURITY_MODE_PSK
+
+            config ANJAY_CLIENT_PSK_IDENTITY
+                string "PSK identity"
+                default ANJAY_CLIENT_ENDPOINT_NAME
+
+            config ANJAY_CLIENT_PSK_KEY
+                string "PSK key"
+                default "1234"
+        endmenu
     endmenu
 
     menu "Connection configuration"
@@ -168,22 +197,23 @@ menu "anjay-esp32-client"
             bool "Obtain IPv6 address"
             default y
 
-        choice ANJAY_WIFI_CONNECT_IPV6_PREF
-            depends on ANJAY_WIFI_CONNECT_IPV6
-            prompt "Preferred IPv6 Type"
-            default ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+        if ANJAY_WIFI_CONNECT_IPV6
+            choice ANJAY_WIFI_CONNECT_IPV6_PREF
+                prompt "Preferred IPv6 Type"
+                default ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
 
-            config ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
-                bool "Local Link Address"
+                config ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+                    bool "Local Link Address"
 
-            config ANJAY_WIFI_CONNECT_IPV6_PREF_GLOBAL
-                bool "Global Address"
+                config ANJAY_WIFI_CONNECT_IPV6_PREF_GLOBAL
+                    bool "Global Address"
 
-            config ANJAY_WIFI_CONNECT_IPV6_PREF_SITE_LOCAL
-                bool "Site Local Address"
+                config ANJAY_WIFI_CONNECT_IPV6_PREF_SITE_LOCAL
+                    bool "Site Local Address"
 
-            config ANJAY_WIFI_CONNECT_IPV6_PREF_UNIQUE_LOCAL
-                bool "Unique Local Link Address"
-        endchoice
+                config ANJAY_WIFI_CONNECT_IPV6_PREF_UNIQUE_LOCAL
+                    bool "Unique Local Link Address"
+            endchoice
+        endif
     endmenu
 endmenu

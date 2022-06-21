@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * All rights reserved.
+ *
+ * Licensed under the AVSystem-5-clause License.
+ * See the attached LICENSE file for details.
  */
 
 #ifndef ANJAY_CONFIG_H
@@ -44,7 +48,7 @@
  * - @c WITH_AVS_COAP_BLOCK is highly recommended
  * - @c WITH_AVS_COAP_OBSERVE (if @c ANJAY_WITH_OBSERVE is enabled)
  * - @c WITH_AVS_COAP_OSCORE (if @c ANJAY_WITH_COAP_OSCORE is enabled, available
- *   only in the commercial version)
+ *   only as a commercial feature)
  *
  * <strong>Anjay requires the following avs_commons components to be
  * enabled:</strong>
@@ -94,6 +98,14 @@
  * may be used.
  */
 #define ANJAY_WITH_ACCESS_CONTROL
+
+/**
+ * Enable automatic attribute storage.
+ *
+ * Requires <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
+ * configuration.
+ */
+#define ANJAY_WITH_ATTR_STORAGE
 
 /**
  * Enable support for the <c>anjay_download()</c> API.
@@ -174,11 +186,8 @@
 
 /**
  * Enable support for features new to LwM2M protocol version 1.1.
- *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
  */
-/* #undef ANJAY_WITH_LWM2M11 */
+#define ANJAY_WITH_LWM2M11
 
 /**
  * Enable support for OSCORE-based security for LwM2M connections.
@@ -186,8 +195,8 @@
  * Requires <c>ANJAY_WITH_LWM2M11</c> to be enabled, and
  * <c>WITH_AVS_COAP_OSCORE</c> to be enabled in avs_coap configuration.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the OSCORE commercial feature. Ignored
+ * in the open source version.
  */
 /* #undef ANJAY_WITH_COAP_OSCORE */
 
@@ -196,20 +205,16 @@
  *
  * Requires <c>ANJAY_WITH_LWM2M11</c> and either <c>ANJAY_WITH_SENML_JSON</c> or
  * <c>ANJAY_WITH_CBOR</c> to be enabled.
- *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
  */
-/* #undef ANJAY_WITH_SEND */
+#define ANJAY_WITH_SEND
 
 /**
  * Enable support for the SMS binding and the SMS trigger mechanism.
  *
- * Requires <c>ANJAY_WITH_LWM2M11</c> to be enabled, and
- * <c>WITH_AVS_COAP_UDP</c> to be enabled in avs_coap configuration.
+ * Requires <c>WITH_AVS_COAP_UDP</c> to be enabled in avs_coap configuration.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the SMS commercial feature. Ignored in
+ * the open source version.
  */
 /* #undef ANJAY_WITH_SMS */
 
@@ -218,8 +223,8 @@
  *
  * Requires <c>ANJAY_WITH_SMS</c> to be enabled.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the SMS commercial feature. Ignored in
+ * the open source version.
  */
 /* #undef ANJAY_WITH_SMS_MULTIPART */
 
@@ -229,7 +234,7 @@
  * Requires <c>ANJAY_WITH_LWM2M11</c> to be enabled, and
  * <c>WITH_AVS_COAP_UDP</c> to be enabled in avs_coap configuration.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
+ * IMPORTANT: Only available as a commercial feature. Ignored in the open
  * source version.
  */
 /* #undef ANJAY_WITH_NIDD */
@@ -239,11 +244,11 @@
  * (<c>anjay_new_from_core_persistence()</c> and
  * <c>anjay_delete_with_core_persistence()</c> APIs).
  *
- * Requires <c>ANJAY_WITH_OBSERVE</c> and <c>ANJAY_WITH_LWM2M11</c> to be
- * enabled, and <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in
- * avs_commons configuration.
+ * Requires <c>ANJAY_WITH_OBSERVE</c> to be enabled, and
+ * <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
+ * configuration.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
+ * IMPORTANT: Only available as a commercial feature. Ignored in the open
  * source version.
  */
 /* #undef ANJAY_WITH_CORE_PERSISTENCE */
@@ -296,40 +301,60 @@
  * is supported.
  *
  * Requires <c>ANJAY_WITH_LWM2M11</c> to be enabled.
- *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
  */
-/* #undef ANJAY_WITH_SENML_JSON */
+#define ANJAY_WITH_SENML_JSON
 
 /**
  * Enable support for CBOR and SenML CBOR formats, as specified in LwM2M TS 1.1.
  *
  * Requires <c>ANJAY_WITH_LWM2M11</c> to be enabled.
- *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
  */
-/* #undef ANJAY_WITH_CBOR */
+#define ANJAY_WITH_CBOR
 
 /**
  * Enable support for Enrollment over Secure Transport.
  *
- * Requires <c>ANJAY_WITH_LWM2M11</c> and <c>ANJAY_WITH_BOOTSTRAP</c>  to be
- * enabled.
+ * Requires <c>ANJAY_WITH_BOOTSTRAP</c> to be enabled.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the EST commercial feature. Ignored in
+ * the open source version.
  */
 /* #undef ANJAY_WITH_EST */
 
 /**
- * Enable support for custom "con" attribute that controls Confirmable
- * notifications.
+ * Enable support for hardware security engine in the EST subsystem.
+ *
+ * Requires <c>ANJAY_WITH_EST</c> to be enabled in Anjay configuration and
+ * <c>AVS_COMMONS_WITH_AVS_CRYPTO_PKI_ENGINE</c> to be enabled in avs_commons
+ * configuration.
+ *
+ * IMPORTANT: Only available in commercial versions that include both the EST
+ * and HSM features. Ignored in versions distributed without these features.
+ */
+/* #undef ANJAY_WITH_EST_ENGINE_SUPPORT */
+
+/**
+ * Enable support for the Confirmable Notification attribute, as specified in
+ * LwM2M TS 1.2.
+ *
+ * Before TS 1.2, this has been supported in Anjay as a custom extension, and
+ * thus it is available independently from TS 1.2 support itself, including in
+ * the open source version.
  *
  * Requires <c>ANJAY_WITH_OBSERVE</c> to be enabled.
  */
 /* #undef ANJAY_WITH_CON_ATTR */
+
+/**
+ * Enable support for handling security credentials in the data model using
+ * structured <c>avs_crypto</c> types.
+ *
+ * If the <c>security</c> module is also enabled (see @ref
+ * ANJAY_WITH_MODULE_SECURITY), it also enables support for passing these
+ * credentials through such structured types when adding Security object
+ * instances via the @ref anjay_security_instance_t structure.
+ */
+/* #undef ANJAY_WITH_SECURITY_STRUCTURED */
 
 /**
  * Maximum size in bytes supported for the "Public Key or Identity" resource in
@@ -414,14 +439,6 @@
  */
 /**@{*/
 /**
- * Enable attr_storage module (automatic attribute storage).
- *
- * Requires <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
- * configuration.
- */
-#define ANJAY_WITH_MODULE_ATTR_STORAGE
-
-/**
  * Enable access_control module (implementation of the Access Control object).
  *
  * Requires <c>ANJAY_WITH_ACCESS_CONTROL</c> to be enabled.
@@ -432,6 +449,23 @@
  * Enable security module (implementation of the LwM2M Security object).
  */
 #define ANJAY_WITH_MODULE_SECURITY
+
+/**
+ * Enable support for hardware security engine in the security module.
+ *
+ * This feature allows security credentials provisioned into the LwM2M Security
+ * object to be automatically moved into a hardware security module.
+ *
+ * Requires <c>ANJAY_WITH_MODULE_SECURITY</c> to be enabled in Anjay
+ * configuration, and at least one of
+ * <c>AVS_COMMONS_WITH_AVS_CRYPTO_PKI_ENGINE</c> or
+ * <c>AVS_COMMONS_WITH_AVS_CRYPTO_PSK_ENGINE</c> to be enabled in avs_commons
+ * configuration.
+ *
+ * IMPORTANT: Only available as part of the HSM support commercial feature.
+ * Ignored in versions distributed without this feature.
+ */
+/* #undef ANJAY_WITH_MODULE_SECURITY_ENGINE_SUPPORT */
 
 /**
  * Enable server module (implementation of the LwM2M Server object).
@@ -455,8 +489,8 @@
  * Requires <c>ANJAY_WITH_SMS</c> to be enabled and the operating system to
  * support the POSIX <c>poll()</c> function.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the SMS commercial feature. Ignored in
+ * the open source version.
  */
 /* #undef ANJAY_WITH_MODULE_AT_SMS */
 
@@ -466,8 +500,8 @@
  *
  * Requires <c>ANJAY_WITH_NIDD</c> to be enabled.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the NIDD commercial feature. Ignored
+ * in the open source version.
  */
 /* #undef ANJAY_WITH_MODULE_BG96_NIDD */
 
@@ -480,7 +514,7 @@
  * <c>AVS_COMMONS_WITH_AVS_PERSISTENCE</c> to be enabled in avs_commons
  * configuration.
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
+ * IMPORTANT: Only available with the boostrapper feature. Ignored in the open
  * source version.
  */
 /* #undef ANJAY_WITH_MODULE_BOOTSTRAPPER */
@@ -488,8 +522,8 @@
 /**
  * Enable oscore module (implementation of the OSCORE object).
  *
- * IMPORTANT: Only available in the commercial version. Ignored in the open
- * source version.
+ * IMPORTANT: Only available as part of the OSCORE commercial feature. Ignored
+ * in the open source version.
  */
 /* #undef ANJAY_WITH_MODULE_OSCORE */
 /**@}*/

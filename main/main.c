@@ -45,14 +45,31 @@
 #include "main.h"
 #include "objects/objects.h"
 
+#ifdef CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
+extern const uint8_t CLIENT_PRIVATE_KEY[] asm("_binary_client_key_der_start");
+extern const uint32_t CLIENT_PRIVATE_KEY_LEN asm("client_key_der_length");
+extern const uint8_t CLIENT_CERT[] asm("_binary_client_cert_der_start");
+extern const uint32_t CLIENT_CERT_LEN asm("client_cert_der_length");
+extern const uint8_t SERVER_CERT[] asm("_binary_server_cert_der_start");
+extern const uint32_t SERVER_CERT_LEN asm("server_cert_der_length");
+#else
+static char PSK[ANJAY_MAX_SECRET_KEY_SIZE];
+static char IDENTITY[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
+#endif // CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
+
+#ifdef CONFIG_ANJAY_CLIENT_SOCKET_TCP
+#    define MAIN_PREFERRED_TRANSPORT "T"
+#else
+#    define MAIN_PREFERRED_TRANSPORT "U"
+#endif // CONFIG_ANJAY_CLIENT_TCP_SOCKET
+
+static char SERVER_URI[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
+static char ENDPOINT_NAME[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
+
 static const anjay_dm_object_def_t **DEVICE_OBJ;
 static const anjay_dm_object_def_t **PUSH_BUTTON_OBJ;
 static const anjay_dm_object_def_t **LIGHT_CONTROL_OBJ;
 static const anjay_dm_object_def_t **WLAN_OBJ;
-
-static char SERVER_URI[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
-static char IDENTITY[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
-static char PSK[ANJAY_MAX_SECRET_KEY_SIZE];
 
 static anjay_t *anjay;
 static avs_sched_handle_t change_config_job_handle;
@@ -110,7 +127,7 @@ static void change_config_job(avs_sched_t *sched, const void *args_ptr) {
                                     ANJAY_WIFI_OBJ_WRITABLE_INSTANCE,
                                     writable_inst_enable);
 
-    anjay_transport_schedule_reconnect(anjay, ANJAY_TRANSPORT_SET_UDP);
+    anjay_transport_schedule_reconnect(anjay, ANJAY_TRANSPORT_SET_IP);
 }
 
 // Installs Security Object and adds and instance of it.
@@ -124,11 +141,23 @@ static int setup_security_object(anjay_t *anjay) {
     anjay_security_instance_t security_instance = {
         .ssid = 1,
         .server_uri = SERVER_URI,
+#ifdef CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
+        .security_mode = ANJAY_SECURITY_CERTIFICATE,
+        .public_cert_or_psk_identity = CLIENT_CERT,
+        .public_cert_or_psk_identity_size = CLIENT_CERT_LEN,
+        .private_cert_or_psk_key = CLIENT_PRIVATE_KEY,
+        .private_cert_or_psk_key_size = CLIENT_PRIVATE_KEY_LEN,
+        .server_public_key = SERVER_CERT,
+        .server_public_key_size = SERVER_CERT_LEN
+#elif CONFIG_ANJAY_SECURITY_MODE_PSK
         .security_mode = ANJAY_SECURITY_PSK,
         .public_cert_or_psk_identity = (const uint8_t *) IDENTITY,
         .public_cert_or_psk_identity_size = strlen(IDENTITY),
         .private_cert_or_psk_key = (const uint8_t *) PSK,
         .private_cert_or_psk_key_size = strlen(PSK)
+#else
+        .security_mode = ANJAY_SECURITY_NOSEC
+#endif // CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
     };
 
     // Anjay will assign Instance ID automatically
@@ -159,8 +188,8 @@ static int setup_server_object(anjay_t *anjay) {
         .default_max_period = -1,
         // Disable Disable Timeout resource
         .disable_timeout = -1,
-        // Sets preferred transport to UDP
-        .binding = "U"
+        // Sets preferred transport
+        .binding = MAIN_PREFERRED_TRANSPORT
     };
 
     // Anjay will assign Instance ID automatically
@@ -213,9 +242,9 @@ static void update_connection_status_job(avs_sched_t *sched,
 
     if (connected_prev && (ret != ESP_OK)) {
         connected_prev = false;
-        anjay_transport_enter_offline(anjay, ANJAY_TRANSPORT_SET_UDP);
+        anjay_transport_enter_offline(anjay, ANJAY_TRANSPORT_SET_IP);
     } else if (!connected_prev && (ret == ESP_OK)) {
-        anjay_transport_exit_offline(anjay, ANJAY_TRANSPORT_SET_UDP);
+        anjay_transport_exit_offline(anjay, ANJAY_TRANSPORT_SET_IP);
         connected_prev = true;
     }
 
@@ -226,7 +255,7 @@ static void update_connection_status_job(avs_sched_t *sched,
 
 static void anjay_init(void) {
     const anjay_configuration_t CONFIG = {
-        .endpoint_name = IDENTITY,
+        .endpoint_name = ENDPOINT_NAME,
         .in_buffer_size = 4000,
         .out_buffer_size = 4000,
         .msg_cache_size = 4000
@@ -242,8 +271,8 @@ static void anjay_init(void) {
     }
 
     // Install Attribute storage and setup necessary objects
-    if (anjay_attr_storage_install(anjay) || setup_security_object(anjay)
-            || setup_server_object(anjay) || fw_update_install(anjay)) {
+    if (setup_security_object(anjay) || setup_server_object(anjay)
+            || fw_update_install(anjay)) {
         avs_log(tutorial, ERROR, "Failed to install core objects");
         return;
     }
@@ -317,11 +346,16 @@ static int read_nvs_anjay_config(void) {
         return -1;
     }
 
-    int result = (nvs_get_str(nvs_h, "identity", IDENTITY,
-                              &(size_t) { sizeof(IDENTITY) })
+    int result = (nvs_get_str(nvs_h, "uri", SERVER_URI,
+                              &(size_t) { sizeof(SERVER_URI) })
+                  || nvs_get_str(nvs_h, "endpoint_name", ENDPOINT_NAME,
+                                 &(size_t) { sizeof(ENDPOINT_NAME) })
+#ifdef CONFIG_ANJAY_SECURITY_MODE_PSK
                   || nvs_get_str(nvs_h, "psk", PSK, &(size_t) { sizeof(PSK) })
-                  || nvs_get_str(nvs_h, "uri", SERVER_URI,
-                                 &(size_t) { sizeof(SERVER_URI) }))
+                  || nvs_get_str(nvs_h, "identity", IDENTITY,
+                                 &(size_t) { sizeof(IDENTITY) })
+#endif // CONFIG_ANJAY_SECURITY_MODE_PSK
+                          )
                          ? -1
                          : 0;
     nvs_close(nvs_h);
@@ -335,13 +369,15 @@ static int read_anjay_config(void) {
     if (read_nvs_anjay_config()) {
         avs_log(tutorial, WARNING,
                 "Reading from NVS has failed, attempt with Kconfig");
-
-        snprintf(IDENTITY, sizeof(IDENTITY), "%s",
-                 CONFIG_ANJAY_CLIENT_PSK_IDENTITY);
-        snprintf(PSK, sizeof(PSK), "%s", CONFIG_ANJAY_CLIENT_PSK_KEY);
+        snprintf(ENDPOINT_NAME, sizeof(ENDPOINT_NAME), "%s",
+                 CONFIG_ANJAY_CLIENT_ENDPOINT_NAME);
         snprintf(SERVER_URI, sizeof(SERVER_URI), "%s",
                  CONFIG_ANJAY_CLIENT_SERVER_URI);
-
+#ifdef CONFIG_ANJAY_SECURITY_MODE_PSK
+        snprintf(PSK, sizeof(PSK), "%s", CONFIG_ANJAY_CLIENT_PSK_KEY);
+        snprintf(IDENTITY, sizeof(IDENTITY), "%s",
+                 CONFIG_ANJAY_CLIENT_PSK_IDENTITY);
+#endif // CONFIG_ANJAY_SECURITY_MODE_PSK
         err = -1;
     }
     return err;

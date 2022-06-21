@@ -12,22 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES)
+     set(Embedded_cert "../server_cert.der" "../client_cert.der" "../client_key.der")
+else()
+     set(Embedded_cert "")
+endif()
+
 idf_component_register(SRCS "main.c"
-                            "connect.c"
-                            "utils.c"
-                            "objects/device.c"
-                            "objects/light_control.c"
-                            "objects/push_button.c"
-                            "objects/mpu6886.c"
-                            "objects/sensors.c"
-                            "objects/wlan.c"
-                            "st7789.c"
-                            "fontx.c"
-                            "lcd.c"
-                            "axp192.c"
-                            "i2c_wrapper.c"
-                            "firmware_update.c"
-                       INCLUDE_DIRS ".")
+                         "connect.c"
+                         "utils.c"
+                         "objects/device.c"
+                         "objects/light_control.c"
+                         "objects/push_button.c"
+                         "objects/mpu6886.c"
+                         "objects/sensors.c"
+                         "objects/wlan.c"
+                         "st7789.c"
+                         "fontx.c"
+                         "lcd.c"
+                         "axp192.c"
+                         "i2c_wrapper.c"
+                         "firmware_update.c"
+                    INCLUDE_DIRS "."
+                    EMBED_FILES ${Embedded_cert})
 
 file(GLOB_RECURSE ANJAY_SOURCES
      "anjay/src/*.c"
