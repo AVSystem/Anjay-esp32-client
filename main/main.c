@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -45,6 +44,15 @@
 #include "main.h"
 #include "objects/objects.h"
 
+#include "firmware_update.h"
+#include "objects/objects.h"
+
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#    include "cellular_anjay_impl/cellular_event_loop.h"
+#    include "cellular_anjay_impl/net_impl.h"
+#    include "cellular_setup.h"
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+
 #ifdef CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
 extern const uint8_t CLIENT_PRIVATE_KEY[] asm("_binary_client_key_der_start");
 extern const uint32_t CLIENT_PRIVATE_KEY_LEN asm("client_key_der_length");
@@ -69,14 +77,19 @@ static char ENDPOINT_NAME[ANJAY_MAX_PK_OR_IDENTITY_SIZE];
 static const anjay_dm_object_def_t **DEVICE_OBJ;
 static const anjay_dm_object_def_t **PUSH_BUTTON_OBJ;
 static const anjay_dm_object_def_t **LIGHT_CONTROL_OBJ;
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 static const anjay_dm_object_def_t **WLAN_OBJ;
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 
 static anjay_t *anjay;
-static avs_sched_handle_t change_config_job_handle;
 static avs_sched_handle_t sensors_job_handle;
 static avs_sched_handle_t connection_status_job_handle;
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+static avs_sched_handle_t change_config_job_handle;
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 
 static int read_anjay_config();
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 static void change_config_job(avs_sched_t *sched, const void *args_ptr);
 
 void schedule_change_config() {
@@ -129,6 +142,7 @@ static void change_config_job(avs_sched_t *sched, const void *args_ptr) {
 
     anjay_transport_schedule_reconnect(anjay, ANJAY_TRANSPORT_SET_IP);
 }
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 
 // Installs Security Object and adds and instance of it.
 // An instance of Security Object provides information needed to connect to
@@ -141,7 +155,7 @@ static int setup_security_object(anjay_t *anjay) {
     anjay_security_instance_t security_instance = {
         .ssid = 1,
         .server_uri = SERVER_URI,
-#ifdef CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES
+#if defined(CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES)
         .security_mode = ANJAY_SECURITY_CERTIFICATE,
         .public_cert_or_psk_identity = CLIENT_CERT,
         .public_cert_or_psk_identity_size = CLIENT_CERT_LEN,
@@ -149,7 +163,7 @@ static int setup_security_object(anjay_t *anjay) {
         .private_cert_or_psk_key_size = CLIENT_PRIVATE_KEY_LEN,
         .server_public_key = SERVER_CERT,
         .server_public_key_size = SERVER_CERT_LEN
-#elif CONFIG_ANJAY_SECURITY_MODE_PSK
+#elif defined(CONFIG_ANJAY_SECURITY_MODE_PSK)
         .security_mode = ANJAY_SECURITY_PSK,
         .public_cert_or_psk_identity = (const uint8_t *) IDENTITY,
         .public_cert_or_psk_identity_size = strlen(IDENTITY),
@@ -217,33 +231,50 @@ static void update_objects_job(avs_sched_t *sched, const void *anjay_ptr) {
 #if CONFIG_ANJAY_CLIENT_LCD
 static void check_and_write_connection_status(anjay_t *anjay) {
     if (anjay_get_socket_entries(anjay) == NULL) {
-        lcd_write_connection_status(STATUS_DISCONNECTED);
+        lcd_write_connection_status(LCD_CONNECTION_STATUS_DISCONNECTED);
     } else if (anjay_all_connections_failed(anjay)) {
-        lcd_write_connection_status(STATUS_CONNECTION_ERROR);
+        lcd_write_connection_status(LCD_CONNECTION_STATUS_CONNECTION_ERROR);
     } else if (anjay_ongoing_registration_exists(anjay)) {
-        lcd_write_connection_status(STATUS_CONNECTING);
+        lcd_write_connection_status(LCD_CONNECTION_STATUS_CONNECTING);
     } else {
-        lcd_write_connection_status(STATUS_CONNECTED);
+        lcd_write_connection_status(LCD_CONNECTION_STATUS_CONNECTED);
     }
 }
-#endif /* CONFIG_ANJAY_CLIENT_LCD */
+#endif // CONFIG_ANJAY_CLIENT_LCD
 
 static void update_connection_status_job(avs_sched_t *sched,
                                          const void *anjay_ptr) {
     anjay_t *anjay = *(anjay_t *const *) anjay_ptr;
-
 #if CONFIG_ANJAY_CLIENT_LCD
     check_and_write_connection_status(anjay);
-#endif /* CONFIG_ANJAY_CLIENT_LCD */
+#endif // CONFIG_ANJAY_CLIENT_LCD
 
     static bool connected_prev = true;
-    wifi_ap_record_t ap_info;
-    esp_err_t ret = esp_wifi_sta_get_ap_info(&ap_info);
+    bool err;
 
-    if (connected_prev && (ret != ESP_OK)) {
+#if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+    CellularServiceStatus_t service_status = { 0 };
+    err = (bool) Cellular_GetServiceStatus(CellularHandle, &service_status);
+
+    if (!err) {
+        err = (service_status.csRegistrationStatus
+                       != REGISTRATION_STATUS_REGISTERED_HOME
+               && service_status.csRegistrationStatus
+                          != REGISTRATION_STATUS_ROAMING_REGISTERED
+               && service_status.psRegistrationStatus
+                          != REGISTRATION_STATUS_REGISTERED_HOME
+               && service_status.psRegistrationStatus
+                          != REGISTRATION_STATUS_ROAMING_REGISTERED);
+    }
+#elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+    wifi_ap_record_t ap_info;
+    err = (bool) esp_wifi_sta_get_ap_info(&ap_info);
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+
+    if (connected_prev && err) {
         connected_prev = false;
         anjay_transport_enter_offline(anjay, ANJAY_TRANSPORT_SET_IP);
-    } else if (!connected_prev && (ret == ESP_OK)) {
+    } else if (!connected_prev && !err) {
         anjay_transport_exit_offline(anjay, ANJAY_TRANSPORT_SET_IP);
         connected_prev = true;
     }
@@ -291,9 +322,11 @@ static void anjay_init(void) {
         anjay_register_object(anjay, PUSH_BUTTON_OBJ);
     }
 
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
     if ((WLAN_OBJ = wlan_object_create())) {
         anjay_register_object(anjay, WLAN_OBJ);
     }
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 }
 
 static void anjay_task(void *pvParameters) {
@@ -302,7 +335,11 @@ static void anjay_task(void *pvParameters) {
     update_connection_status_job(anjay_get_scheduler(anjay), &anjay);
     update_objects_job(anjay_get_scheduler(anjay), &anjay);
 
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+    cellular_event_loop_run(anjay);
+#else
     anjay_event_loop_run(anjay, avs_time_duration_from_scalar(1, AVS_TIME_S));
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
     avs_sched_del(&sensors_job_handle);
     avs_sched_del(&connection_status_job_handle);
     anjay_delete(anjay);
@@ -383,6 +420,7 @@ static int read_anjay_config(void) {
     return err;
 }
 
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 static int read_nvs_wifi_config(const char *namespace,
                                 wifi_config_t *wifi_config,
                                 uint8_t *en) {
@@ -494,22 +532,34 @@ static void set_wifi_config(wifi_config_t *wifi_config) {
                 "Using wifi configuration from preconfigured instance");
     }
 }
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 
 void app_main(void) {
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     avs_log_set_handler(log_handler);
-    avs_log_set_default_level(AVS_LOG_TRACE);
 
+    avs_log_set_default_level(AVS_LOG_TRACE);
     anjay_init();
-    read_wifi_config();
 
 #if CONFIG_ANJAY_CLIENT_LCD
     lcd_init();
+#    if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+    lcd_write_connection_status(LCD_CONNECTION_STATUS_BG96_SETTING);
+#    elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+    lcd_write_connection_status(LCD_CONNECTION_STATUS_WIFI_CONNECTING);
+#    endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#endif     // CONFIG_ANJAY_CLIENT_LCD
 
-    lcd_write_connection_status(STATUS_WIFI_CONNECTING);
-#endif /* CONFIG_ANJAY_CLIENT_LCD */
+#if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+    while (!setupCellular()) {
+        avs_log(tutorial, WARNING, "Cellular setup has failed");
+        Cellular_Cleanup(CellularHandle);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+#elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+    read_wifi_config();
 
     wifi_config_t wifi_config = { 0 };
     set_wifi_config(&wifi_config);
@@ -518,7 +568,7 @@ void app_main(void) {
         wifi_config = wlan_object_get_instance_wifi_config(
                 WLAN_OBJ, ANJAY_WIFI_OBJ_PRECONFIGURED_INSTANCE);
         while (connect_internal(&wifi_config)) {
-            avs_log(tutorial, INFO,
+            avs_log(tutorial, WARNING,
                     "Connection attempt to preconfigured wifi has failed, "
                     "reconnection in progress...");
         }
@@ -528,9 +578,15 @@ void app_main(void) {
                 anjay, WLAN_OBJ, ANJAY_WIFI_OBJ_WRITABLE_INSTANCE, false);
         wlan_object_set_writable_iface_failed(anjay, WLAN_OBJ, true);
     }
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+
 #if CONFIG_ANJAY_CLIENT_LCD
-    lcd_write_connection_status(STATUS_WIFI_CONNECTED);
-#endif /* CONFIG_ANJAY_CLIENT_LCD */
+#    if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+    lcd_write_connection_status(LCD_CONNECTION_STATUS_BG96_SET);
+#    elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+    lcd_write_connection_status(LCD_CONNECTION_STATUS_WIFI_CONNECTED);
+#    endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#endif     // CONFIG_ANJAY_CLIENT_LCD
 
     xTaskCreate(&anjay_task, "anjay_task", 16384, NULL, 5, NULL);
 }

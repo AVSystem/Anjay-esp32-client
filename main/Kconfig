@@ -137,6 +137,39 @@ menu "anjay-esp32-client"
         endmenu
     endmenu
 
+    choice ANJAY_CLIENT_INTERFACE
+        prompt "Choose an interface"
+        default ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+
+        config ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+            bool "Onboard WiFi"
+
+        config ANJAY_CLIENT_INTERFACE_BG96_MODULE
+            bool "External BG96 module"
+    endchoice
+
+    config ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+        bool
+        default y if ANJAY_CLIENT_INTERFACE_BG96_MODULE
+        default n
+
+    if ANJAY_CLIENT_INTERFACE_BG96_MODULE
+        menu "BG96 module configuration"
+
+            config ANJAY_BG96_UART_PORT_NUMBER
+                int "UART port number"
+                default 0
+
+            config ANJAY_BG96_TX_PIN
+                int "UART Tx pin"
+                default 0
+
+            config ANJAY_BG96_RX_PIN
+                int "UART Rx pin"
+                default 0
+        endmenu
+    endif
+
     menu "Client options"
         config ANJAY_CLIENT_ENDPOINT_NAME
             string "Endpoint name"
@@ -144,10 +177,10 @@ menu "anjay-esp32-client"
 
         config ANJAY_CLIENT_SERVER_URI
             string "Server URI"
-            default "coaps://try-anjay.avsystem.com:5684"
+            default "coaps://eu.iot.avsystem.cloud:5684"
 
         choice ANJAY_CLIENT_SOCKET
-        prompt "Choose socket"
+            prompt "Choose socket"
             default ANJAY_CLIENT_SOCKET_UDP
 
             config ANJAY_CLIENT_SOCKET_UDP
@@ -185,35 +218,69 @@ menu "anjay-esp32-client"
     endmenu
 
     menu "Connection configuration"
-        config ANJAY_WIFI_SSID
-            string "WiFi SSID"
-            default "myssid"
+        if ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+            config ANJAY_WIFI_SSID
+                string "WiFi SSID"
+                default "myssid"
 
-        config ANJAY_WIFI_PASSWORD
-            string "WiFi Password"
-            default "mypassword"
+            config ANJAY_WIFI_PASSWORD
+                string "WiFi Password"
+                default "mypassword"
 
-        config ANJAY_WIFI_CONNECT_IPV6
-            bool "Obtain IPv6 address"
-            default y
+            config ANJAY_WIFI_CONNECT_IPV6
+                bool "Obtain IPv6 address"
+                default y
 
-        if ANJAY_WIFI_CONNECT_IPV6
-            choice ANJAY_WIFI_CONNECT_IPV6_PREF
-                prompt "Preferred IPv6 Type"
-                default ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+            if ANJAY_WIFI_CONNECT_IPV6
+                choice ANJAY_WIFI_CONNECT_IPV6_PREF
+                    prompt "Preferred IPv6 Type"
+                    default ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
 
-                config ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
-                    bool "Local Link Address"
+                    config ANJAY_WIFI_CONNECT_IPV6_PREF_LOCAL_LINK
+                        bool "Local Link Address"
 
-                config ANJAY_WIFI_CONNECT_IPV6_PREF_GLOBAL
-                    bool "Global Address"
+                    config ANJAY_WIFI_CONNECT_IPV6_PREF_GLOBAL
+                        bool "Global Address"
 
-                config ANJAY_WIFI_CONNECT_IPV6_PREF_SITE_LOCAL
-                    bool "Site Local Address"
+                    config ANJAY_WIFI_CONNECT_IPV6_PREF_SITE_LOCAL
+                        bool "Site Local Address"
 
-                config ANJAY_WIFI_CONNECT_IPV6_PREF_UNIQUE_LOCAL
-                    bool "Unique Local Link Address"
+                    config ANJAY_WIFI_CONNECT_IPV6_PREF_UNIQUE_LOCAL
+                        bool "Unique Local Link Address"
+                endchoice
+            endif
+        endif
+
+        if ANJAY_CLIENT_INTERFACE_BG96_MODULE
+            config ANJAY_CELLULAR_APN
+                string "APN name"
+                default "Cellular APN"
+
+            choice ANJAY_CELLULAR_PDN_AUTH_TYPE
+                prompt "PDN authentication type"
+                default ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+
+                config ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+                bool "No authentication"
+
+                config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP
+                bool "PAP"
+
+                config ANJAY_CELLULAR_PDN_AUTH_TYPE_CHAP
+                bool "CHAP"
+
+                config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP_OR_CHAP
+                bool "PAP or CHAP"
             endchoice
+
+            config ANJAY_CELLULAR_PDN_USERNAME
+                string "PDN username" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+                default ""
+
+            config ANJAY_CELLULAR_PDN_PASSWORD
+                string "PDN password" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
+                default ""
+
         endif
     endmenu
 endmenu

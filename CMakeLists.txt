@@ -27,4 +27,3 @@ if(CONFIG_PARTITION_TABLE_CUSTOM)
         spiffs_create_partition_image(storage graphics FLASH_IN_PROJECT)
     endif()
 endif()
-

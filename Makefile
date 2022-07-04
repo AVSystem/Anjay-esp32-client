@@ -20,4 +20,3 @@
 PROJECT_NAME := anjay-esp32-client
 
 include $(IDF_PATH)/make/project.mk
-

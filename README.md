@@ -20,20 +20,22 @@ The following LwM2M Objects are supported:
 ## Compiling and launching
 1. Install ESP-IDF and its dependencies on your computer. Please follow the instructions at https://docs.espressif.com/projects/esp-idf/en/v4.4/esp32/get-started/index.html up to and including the point where you call `. $HOME/esp/esp-idf/export.sh`
    * The project has been tested with ESP-IDF v4.4, but may work with other versions as well.
-2. Run `idf.py set-target esp32` in the project directory
-3. Run `idf.py menuconfig`
+1. Clone the repository `git clone https://github.com/AVSystem/Anjay-esp32-client.git` and navigate to project directory
+1. Initialize and update submodules with `git submodule update --init --recursive`
+1. Run `idf.py set-target esp32` in the project directory
+1. Run `idf.py menuconfig`
    * navigate to `Component config/anjay-esp32-client`:
      * select one of supported boards or manually configure the board in `Board options` menu
      * configure Anjay in `Client options` menu
      * configure WiFi in `Connection configuration` menu
-4. Run `idf.py build` to compile
-5. Run `idf.py flash` to flash
+1. Run `idf.py build` to compile
+1. Run `idf.py flash` to flash
    * NOTE: M5StickC-Plus does not support default baudrate, run `idf.py -b 750000 flash` to flash it
-6. The logs will be on the same `/dev/ttyUSB<n>` port that the above used for flashing, 115200 8N1
+1. The logs will be on the same `/dev/ttyUSB<n>` port that the above used for flashing, 115200 8N1
    * You can use `idf.py monitor` to see logs on serial output from a connected device, or even more conveniently `idf.py flash monitor` as one command to see logs right after the device is flashed
 
 ## Connecting to the LwM2M Server
-To connect to [Coiote IoT Device Management](https://www.avsystem.com/products/coiote-iot-device-management-platform/) LwM2M Server, please register at [https://www.avsystem.com/try-anjay/](https://www.avsystem.com/try-anjay/). The default Server URI (Kconfig option `ANJAY_CLIENT_SERVER_URI`) is set to try-anjay server, but you must manually set other client configuration options.
+To connect to [Coiote IoT Device Management](https://www.avsystem.com/products/coiote-iot-device-management-platform/) LwM2M Server, please register at [https://eu.iot.avsystem.cloud/](https://eu.iot.avsystem.cloud/). The default Server URI (Kconfig option `ANJAY_CLIENT_SERVER_URI`) is set to EU Cloud Coiote DM instance, but you must manually set other client configuration options.
 
 NOTE: You may use any LwM2M Server compliant with LwM2M 1.0 TS. The server URI
 can be changed in the example configuration options.
@@ -44,7 +46,7 @@ To do that, `esptool.py` is required, which can be installed running `pip instal
 
 ### Creating a merged binary for M5StickC-Plus
 ```
-esptool.py --chip esp32  merge_bin --flash_mode dio --flash_size 4MB --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/anjay-esp32-client.bin 0x210000 build/storage.bin --output m5stickc-plus.bin
+esptool.py --chip esp32  merge_bin --flash_mode dio --flash_size 4MB --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/anjay-esp32-client.bin 0x310000 build/storage.bin --output m5stickc-plus.bin
 ```
 ### NVS config file
 To generate NVS partition, create a `nvs_config.csv` file with following content:
@@ -76,21 +78,29 @@ esptool.py -b 750000 --chip esp32 write_flash 0x9000 nvs_config.bin
 ```
 Device will be reset and run with provided configuration.
 ### TCP socket
-To switch to TCP socket instead of UDP run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose socket` and select TCP (remember that you must also provide a proper URI in the `nvs_config.csv` file, e.g. `coaps+tcp://try-anjay.avsystem.com:5684`). NOTE: Coiote DM currently only supports the Certificate mode when using TCP and TLS.
+To switch to TCP socket instead of UDP run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose socket` and select TCP (remember that you must also provide a proper URI in the `nvs_config.csv` file, e.g. `coaps+tcp://eu.iot.avsystem.cloud:5684`).
 ### ESP32 with certificates
 1. Prepare your certificates. All certificates should have a `.der` extension and should be added to the directory where this `README.md` file is located. The names of the certificates should be as follows:
    * client public certificate - `client_cert.der`
    * client private certificate - `client_key.der`
    * server public certificate - `server_cert.der`
-2. Run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose security mode` and select `Certificates`.
+1. Run `idf.py menuconfig`, navigate to `Component config/anjay-esp32-client/Client options/Choose security mode` and select `Certificates`.
 ### FOTA
 After compilation, you can perform FOTA with Coiote DM. Required binary file location:
 ```
 $PROJECT_DIR/build/anjay-esp32-client/build/anjay-esp32-client.bin
 ```
+### ESP32 with BG96 and FreeRTOS cellular library
+1. Prepare your BG96 module, connect it to the selected ESP32 UART interface.
+1. Run `idf.py menuconfig`
+   * navigate to `Component config/anjay-esp32-client`:
+      * select `External BG96 module` in `Choose an interface` menu
+      * configure BG96 in `BG96 module configuration` menu
+      * configure PDN in `Connection configuration` menu
 ## Links
 * [Anjay source repository](https://github.com/AVSystem/Anjay)
 * [Anjay documentation](https://avsystem.github.io/Anjay-doc/index.html)
 * [Doxygen-generated API documentation](https://avsystem.github.io/Anjay-doc/api/index.html)
 * [AVSystem IoT Devzone](https://iotdevzone.avsystem.com/)
 * [AVSystem Discord server](https://discord.avsystem.com)
+* [FreeRTOS cellular library](https://www.freertos.org/cellular/index.html)

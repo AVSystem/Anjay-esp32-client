@@ -15,6 +15,7 @@
  */
 
 #include "firmware_update.h"
+#include "cellular_anjay_impl/cellular_event_loop.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -113,9 +114,16 @@ static int fw_perform_upgrade(void *user_ptr) {
                        : -1;
     }
 
+#ifdef CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+    if (cellular_event_loop_interrupt()) {
+        return -1;
+    }
+#else
     if (anjay_event_loop_interrupt(fw_state.anjay)) {
         return -1;
     }
+#endif // CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+
     atomic_store(&fw_state.update_requested, true);
     return 0;
 }

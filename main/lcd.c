@@ -83,8 +83,15 @@ static FontxFile fx32M[2];
 static bool spiffs_opened_properly = false;
 
 static const char *connection_status_texts[] = {
-    "disconnected",    "connection error", "connecting", "connected",
-    "WiFi Connecting", "WiFi Connected",   "unknown"
+    [LCD_CONNECTION_STATUS_DISCONNECTED] = "disconnected",
+    [LCD_CONNECTION_STATUS_CONNECTION_ERROR] = "connection error",
+    [LCD_CONNECTION_STATUS_CONNECTING] = "connecting",
+    [LCD_CONNECTION_STATUS_CONNECTED] = "connected",
+    [LCD_CONNECTION_STATUS_WIFI_CONNECTING] = "WiFi Connecting",
+    [LCD_CONNECTION_STATUS_WIFI_CONNECTED] = "WiFi Connected",
+    [LCD_CONNECTION_STATUS_BG96_SETTING] = "Setting up BG96",
+    [LCD_CONNECTION_STATUS_BG96_SET] = "BG96 set up",
+    [LCD_CONNECTION_STATUS_UNKNOWN] = "unknown"
 };
 
 static void open_SPIFFS_directory(char *path) {
@@ -113,16 +120,18 @@ static void writeText(TFT_t *dev, FontxFile *fx, const char *text, int y) {
     }
 }
 
-void lcd_write_connection_status(uint8_t status) {
-    static uint8_t status_prev = STATUS_DISCONNECTED;
+void lcd_write_connection_status(lcd_connection_status_t status) {
+    static lcd_connection_status_t status_prev =
+            LCD_CONNECTION_STATUS_DISCONNECTED;
     if (status != status_prev) {
         lcdDrawFillRect(&dev, 0, CONNECTION_STATUS_VALUE_AREA_BEGIN,
                         CONFIG_WIDTH, CONNECTION_STATUS_VALUE_AREA_END, BLACK);
-        if (status < STATUS_NUMBER_OF_DEFS) {
+        if (status < LCD_CONNECTION_STATUS_END_) {
             writeText(&dev, fx16G, connection_status_texts[status],
                       CONNECTION_STATUS_VALUE_POSITION);
         } else {
-            writeText(&dev, fx16G, connection_status_texts[STATUS_UNKNOWN],
+            writeText(&dev, fx16G,
+                      connection_status_texts[LCD_CONNECTION_STATUS_UNKNOWN],
                       CONNECTION_STATUS_VALUE_POSITION);
         }
         status_prev = status;
@@ -283,7 +292,7 @@ void lcd_init(void) {
             writeText(&dev, fx16G, "LwM2M Client", LWM2M_CLIENT_TEXT_POSITION);
             writeText(&dev, fx16G,
                       "connection status:", CONNECTION_STATUS_TEXT_POSITION);
-            lcd_write_connection_status(STATUS_DISCONNECTED);
+            lcd_write_connection_status(LCD_CONNECTION_STATUS_DISCONNECTED);
         }
     }
 }
