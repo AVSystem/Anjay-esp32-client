@@ -12,27 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(sources
+     "main.c"
+     "connect.c"
+     "utils.c"
+     "objects/device.c"
+     "objects/light_control.c"
+     "objects/push_button.c"
+     "objects/mpu6886.c"
+     "objects/sensors.c"
+     "st7789.c"
+     "fontx.c"
+     "lcd.c"
+     "axp192.c"
+     "i2c_wrapper.c"
+     "firmware_update.c")
+
 if (CONFIG_ANJAY_SECURITY_MODE_CERTIFICATES)
      set(Embedded_cert "../server_cert.der" "../client_cert.der" "../client_key.der")
 else()
      set(Embedded_cert "")
 endif()
 
-idf_component_register(SRCS "main.c"
-                         "connect.c"
-                         "utils.c"
-                         "objects/device.c"
-                         "objects/light_control.c"
-                         "objects/push_button.c"
-                         "objects/mpu6886.c"
-                         "objects/sensors.c"
-                         "objects/wlan.c"
-                         "st7789.c"
-                         "fontx.c"
-                         "lcd.c"
-                         "axp192.c"
-                         "i2c_wrapper.c"
-                         "firmware_update.c"
+if (CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+     list(APPEND sources
+          "cellular_anjay_impl/net_impl.c"
+          "cellular_anjay_impl/cellular_event_loop.c")
+endif()
+
+if (CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+     list(APPEND sources
+          "objects/wlan.c")
+endif()
+
+idf_component_register(SRCS ${sources}
                     INCLUDE_DIRS "."
                     EMBED_FILES ${Embedded_cert})
 
@@ -61,6 +74,25 @@ target_link_libraries(anjay PRIVATE idf::mbedtls)
 # We disable assertions within anjay to work around that.
 target_compile_definitions(anjay PRIVATE NDEBUG)
 
+if (CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+     file(GLOB_RECURSE FREERTOS_CELLULAR_LIBRARY_SOURCES
+                              "FreeRTOS-Cellular-Interface/source/*.c"
+                              "FreeRTOS-Cellular-Interface/modules/bg96/*.c"
+                              "FreeRTOS-Cellular-Interface/modules/cellular_platform.c")
+
+     add_library(freertos_cellular_library MODULE ${FREERTOS_CELLULAR_LIBRARY_SOURCES})
+     target_include_directories(freertos_cellular_library PRIVATE
+                              "FreeRTOS-Cellular-Interface/source/include/private"
+                              "FreeRTOS-Cellular-Interface/modules/bg96")
+     target_include_directories(freertos_cellular_library PUBLIC
+                              "FreeRTOS-Cellular-Interface/source/include"
+                              "FreeRTOS-Cellular-Interface/source/include/common"
+                              "FreeRTOS-Cellular-Interface/source/logging"
+                              "FreeRTOS-Cellular-Interface/source/cellular_network_transport"
+                              "FreeRTOS-Cellular-Interface/source/interface"
+                              "FreeRTOS-Cellular-Interface/modules")
+     target_link_libraries(freertos_cellular_library PRIVATE anjay)
+endif()
 
 add_custom_target( configure_git_version
     COMMAND ${CMAKE_COMMAND}
@@ -71,4 +103,8 @@ add_custom_target( configure_git_version
 )
 
 add_dependencies(${COMPONENT_LIB} configure_git_version)
+
 target_link_libraries(${COMPONENT_LIB} PRIVATE anjay)
+if (CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
+     target_link_libraries(${COMPONENT_LIB} PRIVATE freertos_cellular_library)
+endif()

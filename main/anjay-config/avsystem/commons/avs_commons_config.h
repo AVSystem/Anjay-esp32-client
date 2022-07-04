@@ -206,6 +206,7 @@
 #define AVS_COMMONS_WITH_AVS_NET
 #define AVS_COMMONS_WITH_AVS_PERSISTENCE
 #define AVS_COMMONS_WITH_AVS_RBTREE
+/* #undef AVS_COMMONS_WITH_AVS_SORTED_SET */
 #define AVS_COMMONS_WITH_AVS_SCHED
 #define AVS_COMMONS_WITH_AVS_STREAM
 /* #undef AVS_COMMONS_WITH_AVS_UNIT */
@@ -613,7 +614,9 @@
  * appropriate compatibility header (see @ref AVS_COMMONS_POSIX_COMPAT_HEADER) -
  * lwIP and Winsock are currently supported for this scenario.
  */
-#define AVS_COMMONS_NET_WITH_POSIX_AVS_SOCKET
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+#    define AVS_COMMONS_NET_WITH_POSIX_AVS_SOCKET
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
 
 /**
  * Enables support for logging socket communication to file.

@@ -47,17 +47,22 @@
 
 #if CONFIG_ANJAY_CLIENT_LCD
 
-#    define STATUS_DISCONNECTED ((uint8_t) 0)
-#    define STATUS_CONNECTION_ERROR ((uint8_t) 1)
-#    define STATUS_CONNECTING ((uint8_t) 2)
-#    define STATUS_CONNECTED ((uint8_t) 3)
-#    define STATUS_WIFI_CONNECTING ((uint8_t) 4)
-#    define STATUS_WIFI_CONNECTED ((uint8_t) 5)
-#    define STATUS_UNKNOWN ((uint8_t) 6)
-#    define STATUS_NUMBER_OF_DEFS ((uint8_t) 7)
+typedef enum {
+    LCD_CONNECTION_STATUS_DISCONNECTED = 0,
+    LCD_CONNECTION_STATUS_CONNECTION_ERROR,
+    LCD_CONNECTION_STATUS_CONNECTING,
+    LCD_CONNECTION_STATUS_CONNECTED,
+    LCD_CONNECTION_STATUS_WIFI_CONNECTING,
+    LCD_CONNECTION_STATUS_WIFI_CONNECTED,
+    LCD_CONNECTION_STATUS_BG96_SETTING,
+    LCD_CONNECTION_STATUS_BG96_SET,
+    LCD_CONNECTION_STATUS_UNKNOWN,
+
+    LCD_CONNECTION_STATUS_END_
+} lcd_connection_status_t;
 
 void lcd_init(void);
-void lcd_write_connection_status(uint8_t status);
+void lcd_write_connection_status(lcd_connection_status_t status);
 
 #endif /* CONFIG_ANJAY_CLIENT_LCD */
 #endif /* _LCD_H_ */

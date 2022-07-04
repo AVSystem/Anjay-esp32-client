@@ -182,7 +182,9 @@
  * enabled as well, but this is not a hard requirement. See the documentation
  * for <c>anjay_event_loop_run()</c> for details.
  */
-#define ANJAY_WITH_EVENT_LOOP
+#ifndef ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+#    define ANJAY_WITH_EVENT_LOOP
+#endif // ANJAY_CLIENT_CELLULAR_EVENT_LOOP
 
 /**
  * Enable support for features new to LwM2M protocol version 1.1.
@@ -292,7 +294,9 @@
  * Disable support for "IP stickiness", i.e. preference of the same IP address
  * when reconnecting to a server using a domain name.
  */
-/* #undef ANJAY_WITHOUT_IP_STICKINESS */
+#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#    define ANJAY_WITHOUT_IP_STICKINESS
+#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
 
 /**
  * Enable support for SenML JSON format, as specified in LwM2M TS 1.1.
@@ -518,6 +522,12 @@
  * source version.
  */
 /* #undef ANJAY_WITH_MODULE_BOOTSTRAPPER */
+
+/**
+ * Enable factory provisioning module. Data provided during provisioning uses
+ * SenML CBOR format.
+ */
+#define ANJAY_WITH_MODULE_FACTORY_PROVISIONING
 
 /**
  * Enable oscore module (implementation of the OSCORE object).
