@@ -20,7 +20,9 @@
 #include "esp_log.h"
 #include "esp_wifi.h"
 
-esp_err_t connect_internal(wifi_config_t *conf);
-esp_err_t disconnect_internal(void);
+void wifi_initialize(void);
+esp_err_t wifi_connect(wifi_config_t *conf);
+esp_err_t wifi_disconnect(void);
+esp_err_t wifi_deinitialize(void);
 
 #endif // _CONNECT_H_

@@ -1,5 +1,11 @@
 # Changelog
 
+## 22.12 (December 13th, 2022)
+
+### Bugfixes
+
+- Fixed a minor bug related to WiFi reconfiguration - after changing the Enable resource (12/x/1) value Anjay ESP32 Client didn't send the response code to the server
+
 ## 22.08 (August 12th, 2022)
 
 ### Features

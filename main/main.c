@@ -100,14 +100,14 @@ void schedule_change_config() {
 static int connect_to_instance(wifi_instance_t iid) {
     wifi_config_t wifi_config =
             wlan_object_get_instance_wifi_config(WLAN_OBJ, iid);
-    return connect_internal(&wifi_config);
+    return wifi_connect(&wifi_config);
 }
 
 // Reconfigure wifi due to enable resource value change
 static void change_config_job(avs_sched_t *sched, const void *args_ptr) {
     bool preconf_inst_enable = false, writable_inst_enable = false;
 
-    disconnect_internal();
+    wifi_disconnect();
     if (wlan_object_is_instance_enabled(WLAN_OBJ,
                                         ANJAY_WIFI_OBJ_WRITABLE_INSTANCE)) {
         avs_log(tutorial, INFO,
@@ -559,15 +559,16 @@ void app_main(void) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 #elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)
+    wifi_initialize();
     read_wifi_config();
 
     wifi_config_t wifi_config = { 0 };
     set_wifi_config(&wifi_config);
 
-    if (connect_internal(&wifi_config)) {
+    if (wifi_connect(&wifi_config)) {
         wifi_config = wlan_object_get_instance_wifi_config(
                 WLAN_OBJ, ANJAY_WIFI_OBJ_PRECONFIGURED_INSTANCE);
-        while (connect_internal(&wifi_config)) {
+        while (wifi_connect(&wifi_config)) {
             avs_log(tutorial, WARNING,
                     "Connection attempt to preconfigured wifi has failed, "
                     "reconnection in progress...");
