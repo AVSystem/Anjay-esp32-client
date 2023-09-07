@@ -1,4 +1,4 @@
-# Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 menu "anjay-esp32-client"
+
     choice ANJAY_CLIENT_DEVBOARD
         prompt "Choose targeted development board"
         default ANJAY_CLIENT_BOARD_UNKNOWN
@@ -146,29 +147,13 @@ menu "anjay-esp32-client"
 
         config ANJAY_CLIENT_INTERFACE_BG96_MODULE
             bool "External BG96 module"
+            select ANJAY_ESP_IDF_WITH_BG96_SUPPORT
     endchoice
 
     config ANJAY_CLIENT_CELLULAR_EVENT_LOOP
         bool
         default y if ANJAY_CLIENT_INTERFACE_BG96_MODULE
         default n
-
-    if ANJAY_CLIENT_INTERFACE_BG96_MODULE
-        menu "BG96 module configuration"
-
-            config ANJAY_BG96_UART_PORT_NUMBER
-                int "UART port number"
-                default 0
-
-            config ANJAY_BG96_TX_PIN
-                int "UART Tx pin"
-                default 0
-
-            config ANJAY_BG96_RX_PIN
-                int "UART Rx pin"
-                default 0
-        endmenu
-    endif
 
     menu "Client options"
         config ANJAY_CLIENT_ENDPOINT_NAME
@@ -217,8 +202,8 @@ menu "anjay-esp32-client"
         endmenu
     endmenu
 
-    menu "Connection configuration"
-        if ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+    if ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI
+        menu "Connection configuration"
             config ANJAY_WIFI_SSID
                 string "WiFi SSID"
                 default "myssid"
@@ -249,38 +234,6 @@ menu "anjay-esp32-client"
                         bool "Unique Local Link Address"
                 endchoice
             endif
-        endif
-
-        if ANJAY_CLIENT_INTERFACE_BG96_MODULE
-            config ANJAY_CELLULAR_APN
-                string "APN name"
-                default "Cellular APN"
-
-            choice ANJAY_CELLULAR_PDN_AUTH_TYPE
-                prompt "PDN authentication type"
-                default ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
-
-                config ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
-                bool "No authentication"
-
-                config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP
-                bool "PAP"
-
-                config ANJAY_CELLULAR_PDN_AUTH_TYPE_CHAP
-                bool "CHAP"
-
-                config ANJAY_CELLULAR_PDN_AUTH_TYPE_PAP_OR_CHAP
-                bool "PAP or CHAP"
-            endchoice
-
-            config ANJAY_CELLULAR_PDN_USERNAME
-                string "PDN username" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
-                default ""
-
-            config ANJAY_CELLULAR_PDN_PASSWORD
-                string "PDN password" if !ANJAY_CELLULAR_PDN_AUTH_TYPE_NONE
-                default ""
-
-        endif
-    endmenu
+        endmenu
+    endif
 endmenu

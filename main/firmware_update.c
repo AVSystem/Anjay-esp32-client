@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,15 +114,20 @@ static int fw_perform_upgrade(void *user_ptr) {
                        : -1;
     }
 
-#ifdef CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+#if defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP) \
+        && !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
     if (cellular_event_loop_interrupt()) {
         return -1;
     }
-#else
+#elif defined(CONFIG_ANJAY_WITH_EVENT_LOOP) \
+        && !defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP)
     if (anjay_event_loop_interrupt(fw_state.anjay)) {
         return -1;
     }
-#endif // CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP
+#else
+#    error "Exactly one Event Loop configuration should be enabled at a time: ANJAY_CLIENT_CELLULAR_EVENT_LOOP or ANJAY_WITH_EVENT_LOOP."
+#endif // defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP) &&
+       // !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
 
     atomic_store(&fw_state.update_requested, true);
     return 0;

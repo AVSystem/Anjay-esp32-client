@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,11 +335,16 @@ static void anjay_task(void *pvParameters) {
     update_connection_status_job(anjay_get_scheduler(anjay), &anjay);
     update_objects_job(anjay_get_scheduler(anjay), &anjay);
 
-#ifdef CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#if defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP) \
+        && !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
     cellular_event_loop_run(anjay);
-#else
+#elif defined(CONFIG_ANJAY_WITH_EVENT_LOOP) \
+        && !defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP)
     anjay_event_loop_run(anjay, avs_time_duration_from_scalar(1, AVS_TIME_S));
-#endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#else
+#    error "Exactly one Event Loop configuration should be enabled at a time: ANJAY_CLIENT_CELLULAR_EVENT_LOOP or ANJAY_WITH_EVENT_LOOP."
+#endif // defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP) &&
+       // !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
     avs_sched_del(&sensors_job_handle);
     avs_sched_del(&connection_status_job_handle);
     anjay_delete(anjay);

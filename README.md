@@ -1,6 +1,6 @@
 # Anjay ESP32 Client
 ## Overview
-This repository contains a LwM2M Client application example for ESP32 devices, based on open-source [Anjay](https://github.com/AVSystem/Anjay) library and [Espressif IoT Development Framework](https://github.com/espressif/esp-idf).
+This repository contains a LwM2M Client application example for ESP32 devices, based on open-source [Anjay-esp-idf](https://github.com/AVSystem/Anjay-esp-idf) component and [Espressif IoT Development Framework](https://github.com/espressif/esp-idf).
 
 The following boards are supported natively in the project:
 - ESP-WROVER-KIT
@@ -18,16 +18,18 @@ The following LwM2M Objects are supported:
 | M5StickC-Plus  | Push button (/3347)<br>Light control (/3311)<br>Temperature sensor (/3303)<br>Accelerometer (/3313)<br>Gyroscope (/3343)
 
 ## Compiling and launching
-1. Install ESP-IDF and its dependencies on your computer. Please follow the instructions at https://docs.espressif.com/projects/esp-idf/en/v4.4/esp32/get-started/index.html up to and including the point where you call `. $HOME/esp/esp-idf/export.sh`
-   * The project has been tested with ESP-IDF v4.4, but may work with other versions as well.
+1. Install ESP-IDF and its dependencies on your computer. Please follow the instructions at https://docs.espressif.com/projects/esp-idf/en/v4.4.5/esp32/get-started/index.html up to and including the point where you call `. $HOME/esp/esp-idf/export.sh`
+   * The project has been tested with ESP-IDF v4.4.5, but may work with other versions as well.
 1. Clone the repository `git clone https://github.com/AVSystem/Anjay-esp32-client.git` and navigate to project directory
 1. Initialize and update submodules with `git submodule update --init --recursive`
 1. Run `idf.py set-target esp32` in the project directory
 1. Run `idf.py menuconfig`
    * navigate to `Component config/anjay-esp32-client`:
      * select one of supported boards or manually configure the board in `Board options` menu
-     * configure Anjay in `Client options` menu
-     * configure WiFi in `Connection configuration` menu
+     * configure LwM2M client configuration in `Client options` menu
+     * configure Wi-Fi in `Connection configuration` menu
+   * navigate to `Component config/Anjay library configuration` to configure `Anjay`
+     library and its dependencies (`avs_commons` and `avs_coap`)
 1. Run `idf.py build` to compile
 1. Run `idf.py flash` to flash
    * NOTE: M5StickC-Plus does not support default baudrate, run `idf.py -b 750000 flash` to flash it
@@ -95,8 +97,11 @@ $PROJECT_DIR/build/anjay-esp32-client/build/anjay-esp32-client.bin
 1. Run `idf.py menuconfig`
    * navigate to `Component config/anjay-esp32-client`:
       * select `External BG96 module` in `Choose an interface` menu
+   * navigate to `Component config/Anjay library configuration/Enable support for external BG96 module`:
       * configure BG96 in `BG96 module configuration` menu
-      * configure PDN in `Connection configuration` menu
+      * configure PDN authentication type in `PDN authentication type` menu
+      * configure the `APN name` (and `PDN username/password` if needed)
+
 ## Links
 * [Anjay source repository](https://github.com/AVSystem/Anjay)
 * [Anjay documentation](https://avsystem.github.io/Anjay-doc/index.html)

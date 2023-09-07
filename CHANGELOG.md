@@ -1,5 +1,17 @@
 # Changelog
 
+## 23.09 (September 7th, 2023)
+
+### BREAKING CHANGES
+- Removed Anjay and FreeRTOS-Cellular-Interface submodules and added Anjay-esp-idf
+  component into the components/ directory
+
+### Improvements
+- Revamped configuration of Anjay and its dependencies
+- The Anjay-esp-idf component includes a new `Component config/Anjay library
+  configuration` menu for configuring the Anjay library
+- Updated recommended ESP IDF to v4.4.5
+
 ## 22.12 (December 13th, 2022)
 
 ### Bugfixes
