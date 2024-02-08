@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,20 @@
  *  - I2C driver for ESP-IDF:
  *    https://gist.github.com/code0100fun/9e5335e9a36a3db9bd45453d77b336e4
  */
-#include "mpu6886.h"
-#include "driver/gpio.h"
-#include "driver/i2c.h"
-#include "esp_err.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include <stdint.h>
+
+#include <esp_err.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+#include <driver/gpio.h>
+#include <driver/i2c.h>
+
 #include "i2c_wrapper.h"
+#include "mpu6886.h"
 #include "objects.h"
 #include "sdkconfig.h"
-#include "stdbool.h"
-#include "stdint.h"
 
 #if CONFIG_ANJAY_CLIENT_BOARD_M5STICKC_PLUS
 
@@ -99,28 +102,14 @@
 #    define ACCELEROMETER_LSB_TO_G_FACTOR_2G (16384.0)
 #    define TEMPERATURE_ZERO_LSB_OFFSET (25.0)
 
-/*
- * Macros for data structures access control
- * Mutexes guarantee datasets consistence
- */
-#    define MUTEX_LOCK(struct) ((struct) .mutex = true)
-#    define MUTEX_UNLOCK(struct) ((struct) .mutex = false)
-#    define MUTEX_IS_LOCKED(struct) ((struct) .mutex)
-
 typedef struct mems_sensor_data_struct {
     double x_value;
     double y_value;
     double z_value;
-    bool mutex;
 } mems_sensor_data_t;
 
-typedef struct temperature_sensor_data_struct {
-    double value;
-    bool mutex;
-} temperature_sensor_data_t;
-
 static mems_sensor_data_t accelerometer_data, gyroscope_data;
-static temperature_sensor_data_t temperature_sensor_data;
+static double temperature_sensor_data;
 
 static i2c_device_t mpu6886_device = {
     .config = {
@@ -137,11 +126,9 @@ static i2c_device_t mpu6886_device = {
 
 int accelerometer_read_data(void) {
     uint8_t acc[6];
-    if ((i2c_master_read_slave_reg(&mpu6886_device,
-                                   MPU6886_REG_ADDR_ACCEL_XOUT_H, acc, 6)
-         == ESP_OK)
-            || !MUTEX_IS_LOCKED(accelerometer_data)) {
-        MUTEX_LOCK(accelerometer_data);
+    if (i2c_master_read_slave_reg(&mpu6886_device,
+                                  MPU6886_REG_ADDR_ACCEL_XOUT_H, acc, 6)
+            == ESP_OK) {
         accelerometer_data.x_value =
                 ((double) (int16_t) ((acc[0] << 8) | acc[1]))
                 / ACCELEROMETER_LSB_TO_G_FACTOR_2G * GRAVITY_CONSTANT;
@@ -151,86 +138,58 @@ int accelerometer_read_data(void) {
         accelerometer_data.z_value =
                 ((double) (int16_t) ((acc[4] << 8) | acc[5]))
                 / ACCELEROMETER_LSB_TO_G_FACTOR_2G * GRAVITY_CONSTANT;
-        MUTEX_UNLOCK(accelerometer_data);
         return 0;
     } else {
         return -1;
     }
 }
 
-int accelerometer_get_data(three_axis_sensor_data_t *sensor_data) {
-    if (!MUTEX_IS_LOCKED(accelerometer_data)) {
-        MUTEX_LOCK(accelerometer_data);
-        sensor_data->x_value = accelerometer_data.x_value;
-        sensor_data->y_value = accelerometer_data.y_value;
-        sensor_data->z_value = accelerometer_data.z_value;
-        MUTEX_UNLOCK(accelerometer_data);
-        return 0;
-    } else {
-        return -1;
-    }
+void accelerometer_get_data(three_axis_sensor_data_t *sensor_data) {
+    sensor_data->x_value = accelerometer_data.x_value;
+    sensor_data->y_value = accelerometer_data.y_value;
+    sensor_data->z_value = accelerometer_data.z_value;
 }
 
 int temperature_read_data(void) {
     uint8_t temp[2];
-    if ((i2c_master_read_slave_reg(&mpu6886_device, MPU6886_REG_ADDR_TEMP_OUT_H,
-                                   temp, 2)
-         == ESP_OK)
-            || !MUTEX_IS_LOCKED(temperature_sensor_data)) {
-        MUTEX_LOCK(temperature_sensor_data);
-        temperature_sensor_data.value =
+    if (i2c_master_read_slave_reg(&mpu6886_device, MPU6886_REG_ADDR_TEMP_OUT_H,
+                                  temp, 2)
+            == ESP_OK) {
+        temperature_sensor_data =
                 ((double) ((int16_t) ((temp[0] << 8) | temp[1]))
                  / TEMPERATURE_LSB_TO_C_FACTOR)
                 + TEMPERATURE_ZERO_LSB_OFFSET;
-        MUTEX_UNLOCK(temperature_sensor_data);
         return 0;
     } else {
         return -1;
     }
 }
 
-int temperature_get_data(double *sensor_data) {
-    if (!MUTEX_IS_LOCKED(temperature_sensor_data)) {
-        MUTEX_LOCK(temperature_sensor_data);
-        *sensor_data = temperature_sensor_data.value;
-        MUTEX_UNLOCK(temperature_sensor_data);
-        return 0;
-    } else {
-        return -1;
-    }
+void temperature_get_data(double *sensor_data) {
+    *sensor_data = temperature_sensor_data;
 }
 
 int gyroscope_read_data(void) {
     uint8_t dps[6];
-    if ((i2c_master_read_slave_reg(&mpu6886_device,
-                                   MPU6886_REG_ADDR_GYRO_XOUT_H, dps, 6)
-         == ESP_OK)
-            || !MUTEX_IS_LOCKED(gyroscope_data)) {
-        MUTEX_LOCK(gyroscope_data);
+    if (i2c_master_read_slave_reg(&mpu6886_device, MPU6886_REG_ADDR_GYRO_XOUT_H,
+                                  dps, 6)
+            == ESP_OK) {
         gyroscope_data.x_value = ((double) (int16_t) ((dps[0] << 8) | dps[1]))
                                  / GYROSCOPE_LSB_TO_DPS_FACTOR_500DPS;
         gyroscope_data.y_value = ((double) (int16_t) ((dps[2] << 8) | dps[3]))
                                  / GYROSCOPE_LSB_TO_DPS_FACTOR_500DPS;
         gyroscope_data.z_value = ((double) (int16_t) ((dps[4] << 8) | dps[5]))
                                  / GYROSCOPE_LSB_TO_DPS_FACTOR_500DPS;
-        MUTEX_UNLOCK(gyroscope_data);
         return 0;
     } else {
         return -1;
     }
 }
 
-int gyroscope_get_data(three_axis_sensor_data_t *sensor_data) {
-    if (!MUTEX_IS_LOCKED(gyroscope_data)) {
-        MUTEX_LOCK(gyroscope_data);
-        sensor_data->x_value = gyroscope_data.x_value;
-        sensor_data->y_value = gyroscope_data.y_value;
-        sensor_data->z_value = gyroscope_data.z_value;
-        MUTEX_UNLOCK(gyroscope_data);
-        return 0;
-    } else {
-        return -1;
-    }
+void gyroscope_get_data(three_axis_sensor_data_t *sensor_data) {
+    sensor_data->x_value = gyroscope_data.x_value;
+    sensor_data->y_value = gyroscope_data.y_value;
+    sensor_data->z_value = gyroscope_data.z_value;
 }
 
 int mpu6886_device_init(void) {
@@ -263,7 +222,8 @@ int mpu6886_device_init(void) {
     }
     vTaskDelay(I2C_TIMEOUT_TICKS);
 
-    if (i2c_master_write_slave_reg(&mpu6886_device, MPU6886_REG_ADDR_PWR_MGMT_2,
+    if (i2c_master_write_slave_reg(&mpu6886_device,
+                                   MPU6886_REG_ADDR_PWR_MGMT_2,
                                    MPU6886_REG_PWR_MGMT_2_EN_ALL)) {
         return -1;
     }
@@ -274,9 +234,6 @@ int mpu6886_device_init(void) {
         return -1;
     }
 
-    MUTEX_UNLOCK(accelerometer_data);
-    MUTEX_UNLOCK(gyroscope_data);
-    MUTEX_UNLOCK(temperature_sensor_data);
     return 0;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 #ifndef NET_IMPL_H
 #define NET_IMPL_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <avsystem/commons/avs_errno.h>
 #include <avsystem/commons/avs_socket.h>
 
-#include "cellular_common.h"
-#include "sockets_wrapper.h"
+#include <cellular_common.h>
 
 extern CellularHandle_t CellularHandle;
 extern uint8_t CellularSocketPdnContextId;

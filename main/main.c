@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
-#include "freertos/task.h"
-#include "nvs_flash.h"
-#include "sdkconfig.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "lwip/dns.h"
-#include "lwip/err.h"
-#include "lwip/netdb.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
+#include <esp_event.h>
+#include <esp_log.h>
+#include <esp_netif.h>
+#include <esp_wifi.h>
+#include <nvs_flash.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+#include <avsystem/commons/avs_log.h>
+#include <avsystem/commons/avs_sched.h>
 
 #include <anjay/anjay.h>
 #include <anjay/attr_storage.h>
 #include <anjay/core.h>
 #include <anjay/security.h>
 #include <anjay/server.h>
-#include <avsystem/commons/avs_log.h>
 
 #include "connect.h"
 #include "default_config.h"
@@ -43,11 +43,15 @@
 #include "lcd.h"
 #include "main.h"
 #include "objects/objects.h"
-
-#include "firmware_update.h"
-#include "objects/objects.h"
+#include "sdkconfig.h"
 
 #ifdef CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
+#    include <cellular_common.h>
+#    include <cellular_config_defaults.h>
+#    include <cellular_types.h>
+
+#    include <cellular_api.h>
+
 #    include "cellular_anjay_impl/cellular_event_loop.h"
 #    include "cellular_anjay_impl/net_impl.h"
 #    include "cellular_setup.h"
@@ -228,7 +232,7 @@ static void update_objects_job(avs_sched_t *sched, const void *anjay_ptr) {
                       &update_objects_job, &anjay, sizeof(anjay));
 }
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 static void check_and_write_connection_status(anjay_t *anjay) {
     if (anjay_get_socket_entries(anjay) == NULL) {
         lcd_write_connection_status(LCD_CONNECTION_STATUS_DISCONNECTED);
@@ -245,7 +249,7 @@ static void check_and_write_connection_status(anjay_t *anjay) {
 static void update_connection_status_job(avs_sched_t *sched,
                                          const void *anjay_ptr) {
     anjay_t *anjay = *(anjay_t *const *) anjay_ptr;
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
     check_and_write_connection_status(anjay);
 #endif // CONFIG_ANJAY_CLIENT_LCD
 
@@ -548,7 +552,7 @@ void app_main(void) {
     avs_log_set_default_level(AVS_LOG_TRACE);
     anjay_init();
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
     lcd_init();
 #    if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
     lcd_write_connection_status(LCD_CONNECTION_STATUS_BG96_SETTING);
@@ -586,7 +590,7 @@ void app_main(void) {
     }
 #endif // CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 #    if defined(CONFIG_ANJAY_CLIENT_INTERFACE_BG96_MODULE)
     lcd_write_connection_status(LCD_CONNECTION_STATUS_BG96_SET);
 #    elif defined(CONFIG_ANJAY_CLIENT_INTERFACE_ONBOARD_WIFI)

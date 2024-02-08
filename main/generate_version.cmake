@@ -1,4 +1,4 @@
-# Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+# Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always
 if(GIT_DESCRIBE_RESULT EQUAL 0)
     string(STRIP "${CLIENT_VERSION_S}" CLIENT_VERSION)
 else()
-    set(CLIENT_VERSION "23.11")
+    set(CLIENT_VERSION "24.02")
 endif()
 # Input and output files are extracted from parameters.
 configure_file("${INPUT_FILE}" "${OUTPUT_FILE}" @ONLY)

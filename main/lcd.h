@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  *
  * Copyright (c) 2020 nopnop2002
  *  - https://github.com/nopnop2002/esp-idf-m5stickC-Plus
- * Copyright (c) 2021-2023 AVSystem
+ * Copyright (c) 2021-2024 AVSystem
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,9 +43,8 @@
 #define _LCD_H_
 
 #include "sdkconfig.h"
-#include <stdint.h>
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 
 typedef enum {
     LCD_CONNECTION_STATUS_DISCONNECTED = 0,

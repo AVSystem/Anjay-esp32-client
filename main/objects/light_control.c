@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@
 
 #include <anjay/anjay.h>
 #include <avsystem/commons/avs_defs.h>
-#include <avsystem/commons/avs_list.h>
 #include <avsystem/commons/avs_memory.h>
 
 #include <driver/ledc.h>
+
+#include "sdkconfig.h"
 
 /**
  * On/Off: RW, Single, Mandatory

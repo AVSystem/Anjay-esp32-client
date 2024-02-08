@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  *
  * Copyright (c) 2020 nopnop2002
  *  - https://github.com/nopnop2002/esp-idf-m5stickC-Plus
- * Copyright (c) 2021-2023 AVSystem
+ * Copyright (c) 2021-2024 AVSystem
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,18 +39,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "lcd.h"
-#include "bmpfile.h"
-#include "esp_err.h"
-#include "esp_log.h"
-#include "esp_spiffs.h"
-#include "esp_vfs.h"
-#include "fontx.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+
+#include <assert.h>
+#include <dirent.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#include <esp_err.h>
+#include <esp_log.h>
+#include <esp_spiffs.h>
+
+#include "bmpfile.h"
+#include "fontx.h"
+#include "lcd.h"
+
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 
 #    if CONFIG_ANJAY_CLIENT_BOARD_M5STICKC_PLUS
 #        include "axp192.h"

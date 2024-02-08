@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,25 @@
    CONDITIONS OF ANY KIND, either express or implied.
  */
 
-#include "driver/gpio.h"
-#include "esp_event.h"
-#include "esp_netif.h"
-#include "esp_wifi_default.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/event_groups.h"
-#include "freertos/task.h"
-#include "lwip/err.h"
-#include "lwip/sys.h"
-#include "sdkconfig.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
+#include <esp_err.h>
+#include <esp_event.h>
+#include <esp_log.h>
+#include <esp_netif.h>
+#include <esp_netif_ip_addr.h>
+#include <esp_netif_types.h>
+#include <esp_wifi.h>
+#include <esp_wifi_default.h>
+#include <esp_wifi_types.h>
+
 #include "connect.h"
+#include "sdkconfig.h"
 
 static wifi_config_t wifi_config;
 

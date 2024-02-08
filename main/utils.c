@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-#include "utils.h"
-
+#include <stdint.h>
 #include <string.h>
 
-#include "esp_system.h"
+#include <esp_err.h>
+#include <esp_system.h>
 
 #include <avsystem/commons/avs_utils.h>
+
+#include "utils.h"
 
 int get_device_id(device_id_t *out_id) {
     memset(out_id->value, 0, sizeof(out_id->value));

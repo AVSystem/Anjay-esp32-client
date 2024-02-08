@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  *
  * Copyright (c) 2020 nopnop2002
  *  - https://github.com/nopnop2002/esp-idf-m5stickC-Plus
- * Copyright (c) 2021-2023 AVSystem
+ * Copyright (c) 2021-2024 AVSystem
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,19 +44,26 @@
  * ST7789V2 Datasheet:
  * https://ap.zzjf110.com/attachment/file/ST7789V2_SPEC_V1.0.pdf
  */
+
 #include <math.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include <esp_err.h>
+#include <esp_log.h>
 
-#include "esp_log.h"
 #include <driver/gpio.h>
 #include <driver/spi_master.h>
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+#include "sdkconfig.h"
 #include "st7789.h"
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 
 #    define CONFIG_MOSI_GPIO ((int16_t) 15)
 #    define CONFIG_SCLK_GPIO ((int16_t) 13)

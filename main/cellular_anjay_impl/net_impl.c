@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <inttypes.h>
 #include <netdb.h>
-#include <unistd.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "cellular_setup.h"
-#include "main.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/event_groups.h>
+
+#include <avsystem/commons/avs_errno.h>
 #include <avsystem/commons/avs_log.h>
 #include <avsystem/commons/avs_socket_v_table.h>
+#include <avsystem/commons/avs_time.h>
 #include <avsystem/commons/avs_utils.h>
+
+#include <cellular_common.h>
+#include <cellular_setup.h>
+#include <sockets_wrapper.h>
 
 #include "net_impl.h"
 

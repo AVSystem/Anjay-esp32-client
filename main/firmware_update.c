@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-#include "firmware_update.h"
-#include "cellular_anjay_impl/cellular_event_loop.h"
-
 #include <assert.h>
-#include <errno.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include <avsystem/commons/avs_log.h>
 
-#include "esp_log.h"
-#include "esp_ota_ops.h"
-#include "esp_system.h"
-#include "nvs_flash.h"
+#include <anjay/anjay.h>
+#include <anjay/fw_update.h>
 
-#include "main.h"
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
+#include <esp_system.h>
+
+#include "firmware_update.h"
+#include "sdkconfig.h"
+
+#if defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP) \
+        && !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
+#    include "cellular_anjay_impl/cellular_event_loop.h"
+#endif // defined(CONFIG_ANJAY_CLIENT_CELLULAR_EVENT_LOOP)
+       // && !defined(CONFIG_ANJAY_WITH_EVENT_LOOP)
 
 static struct {
     anjay_t *anjay;
@@ -50,13 +55,13 @@ static int fw_stream_open(void *user_ptr,
 
     fw_state.update_partition = esp_ota_get_next_update_partition(NULL);
     if (!fw_state.update_partition) {
-        avs_log(tutorial, ERROR, "Cannot obtain update partition");
+        avs_log(fw_update, ERROR, "Cannot obtain update partition");
         return -1;
     }
 
     if (esp_ota_begin(fw_state.update_partition, OTA_SIZE_UNKNOWN,
                       &fw_state.update_handle)) {
-        avs_log(tutorial, ERROR, "OTA begin failed");
+        avs_log(fw_update, ERROR, "OTA begin failed");
         fw_state.update_partition = NULL;
         return -1;
     }
@@ -70,7 +75,7 @@ static int fw_stream_write(void *user_ptr, const void *data, size_t length) {
 
     int result = esp_ota_write(fw_state.update_handle, data, length);
     if (result) {
-        avs_log(tutorial, ERROR, "OTA write failed");
+        avs_log(fw_update, ERROR, "OTA write failed");
         return result == ESP_ERR_OTA_VALIDATE_FAILED
                        ? ANJAY_FW_UPDATE_ERR_UNSUPPORTED_PACKAGE_TYPE
                        : -1;
@@ -85,7 +90,7 @@ static int fw_stream_finish(void *user_ptr) {
 
     int result = esp_ota_end(fw_state.update_handle);
     if (result) {
-        avs_log(tutorial, ERROR, "OTA end failed");
+        avs_log(fw_update, ERROR, "OTA end failed");
         fw_state.update_partition = NULL;
         return result == ESP_ERR_OTA_VALIDATE_FAILED
                        ? ANJAY_FW_UPDATE_ERR_INTEGRITY_FAILURE
@@ -149,7 +154,7 @@ int fw_update_install(anjay_t *anjay) {
 
     if (partition_state == ESP_OTA_IMG_UNDEFINED
             || partition_state == ESP_OTA_IMG_PENDING_VERIFY) {
-        avs_log(tutorial, INFO, "First boot from partition with new firmware");
+        avs_log(fw_update, INFO, "First boot from partition with new firmware");
         esp_ota_mark_app_valid_cancel_rollback();
         state.result = ANJAY_FW_UPDATE_INITIAL_SUCCESS;
     }
@@ -166,6 +171,6 @@ bool fw_update_requested(void) {
 }
 
 void fw_update_reboot(void) {
-    avs_log(tutorial, INFO, "Rebooting to perform a firmware upgrade...");
+    avs_log(fw_update, INFO, "Rebooting to perform a firmware upgrade...");
     esp_restart();
 }

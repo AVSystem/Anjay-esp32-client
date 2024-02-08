@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,14 @@
  * ST7789V2 Datasheet:
  * https://ap.zzjf110.com/attachment/file/ST7789V2_SPEC_V1.0.pdf
  */
-#include "driver/spi_master.h"
-#include "fontx.h"
+#include <stdint.h>
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#include <driver/spi_master.h>
+
+#include "fontx.h"
+#include "sdkconfig.h"
+
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 
 #    define RED 0xf800
 #    define GREEN 0x07e0

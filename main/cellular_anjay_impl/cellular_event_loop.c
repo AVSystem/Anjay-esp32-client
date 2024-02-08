@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-#include "cellular_event_loop.h"
-#include "cellular_anjay_impl/net_impl.h"
-#include <avsystem/commons/avs_log.h>
 #include <stdatomic.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+#include <avsystem/commons/avs_list.h>
+#include <avsystem/commons/avs_log.h>
+#include <avsystem/commons/avs_socket.h>
+
+#include <anjay/anjay.h>
+
+#include "cellular_event_loop.h"
+#include "net_impl.h"
 
 #define CELLULAR_EVENT_LOOP_MAX_WAIT_TIME 100
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <stdint.h>
+
+#include <freertos/FreeRTOS.h>
+
+#include <esp_err.h>
+
+#include <driver/i2c.h>
+
 #include "i2c_wrapper.h"
-#include "driver/gpio.h"
-#include "driver/i2c.h"
-#include "freertos/FreeRTOS.h"
 
 #define I2C_TIMEOUT_MS (10)
 #define I2C_TIMEOUT_TICKS (I2C_TIMEOUT_MS / portTICK_PERIOD_MS)

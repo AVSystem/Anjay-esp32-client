@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 #ifndef _I2C_WRAPPER_H_
 #define _I2C_WRAPPER_H_
 
-#include "driver/i2c.h"
+#include <stdint.h>
+
+#include <driver/i2c.h>
 
 #define I2C_ACK_CHECK_EN (1)
 #define I2C_ACK_CHECK_DIS (0)

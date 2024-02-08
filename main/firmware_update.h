@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 #ifndef FIRMWARE_UPDATE_H
 #define FIRMWARE_UPDATE_H
 
+#include <stdbool.h>
+
 #include <anjay/anjay.h>
-#include <anjay/fw_update.h>
-#include <stdatomic.h>
 
 int fw_update_install(anjay_t *anjay);
 bool fw_update_requested(void);

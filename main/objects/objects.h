@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 #pragma once
 
-#include "esp_wifi.h"
-#include <anjay/dm.h>
+#include <stdbool.h>
+
+#include <esp_wifi.h>
+
+#include <anjay/anjay.h>
 
 typedef struct three_axis_sensor_data_struct {
     double x_value;

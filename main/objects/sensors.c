@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@
 #include <anjay/ipso_objects.h>
 
 #include <avsystem/commons/avs_defs.h>
-#include <avsystem/commons/avs_list.h>
 #include <avsystem/commons/avs_log.h>
-#include <avsystem/commons/avs_memory.h>
 
 #include "mpu6886.h"
 #include "objects/objects.h"
@@ -35,7 +33,7 @@ typedef struct {
     anjay_oid_t oid;
     double data;
     int (*read_data)(void);
-    int (*get_data)(double *sensor_data);
+    void (*get_data)(double *sensor_data);
 } basic_sensor_context_t;
 
 typedef struct {
@@ -46,7 +44,7 @@ typedef struct {
     double max_value;
     three_axis_sensor_data_t data;
     int (*read_data)(void);
-    int (*get_data)(three_axis_sensor_data_t *sensor_data);
+    void (*get_data)(three_axis_sensor_data_t *sensor_data);
 } three_axis_sensor_context_t;
 
 static three_axis_sensor_context_t THREE_AXIS_SENSORS_DEF[] = {
@@ -93,7 +91,8 @@ int basic_sensor_get_value(anjay_iid_t iid, void *_ctx, double *value) {
     assert(ctx->get_data);
     assert(value);
 
-    if (!ctx->read_data() && !ctx->get_data(&ctx->data)) {
+    if (!ctx->read_data()) {
+        ctx->get_data(&ctx->data);
         *value = ctx->data;
         return 0;
     } else {
@@ -114,7 +113,8 @@ int three_axis_sensor_get_values(anjay_iid_t iid,
     assert(y_value);
     assert(z_value);
 
-    if (!ctx->read_data() && !ctx->get_data(&ctx->data)) {
+    if (!ctx->read_data()) {
+        ctx->get_data(&ctx->data);
         *x_value = ctx->data.x_value;
         *y_value = ctx->data.y_value;
         *z_value = ctx->data.z_value;
@@ -206,5 +206,5 @@ void sensors_update(anjay_t *anjay) {
 void sensors_release(void) {
 #if CONFIG_ANJAY_CLIENT_BOARD_M5STICKC_PLUS
     mpu6886_driver_release();
-#endif
+#endif // CONFIG_ANJAY_CLIENT_BOARD_M5STICKC_PLUS
 }

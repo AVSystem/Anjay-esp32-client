@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  *
  * Copyright (c) 2020 nopnop2002
  *  - https://github.com/nopnop2002/esp-idf-m5stickC-Plus
- * Copyright (c) 2021-2023 AVSystem
+ * Copyright (c) 2021-2024 AVSystem
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,17 +40,15 @@
  * SOFTWARE.
  */
 
-#include "fontx.h"
-#include "esp_err.h"
-#include "esp_log.h"
-#include "esp_spiffs.h"
-#include "sdkconfig.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/unistd.h>
 
-#if CONFIG_ANJAY_CLIENT_LCD
+#include "fontx.h"
+#include "sdkconfig.h"
+
+#ifdef CONFIG_ANJAY_CLIENT_LCD
 
 void AddFontx(FontxFile *fx, const char *path) {
     memset(fx, 0, sizeof(FontxFile));

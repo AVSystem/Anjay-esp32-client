@@ -1,5 +1,13 @@
 # Changelog
 
+## 24.02 (February 8th, 2024)
+
+### Improvements
+- Cleaned up include headers
+
+### Bugfixes
+- Removed inappropriate mutexes in mpu6886 driver
+
 ## 23.11 (November 21st, 2023)
 
 ### Improvements

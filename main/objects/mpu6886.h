@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ int accelerometer_read_data(void);
 int gyroscope_read_data(void);
 int temperature_read_data(void);
 
-int accelerometer_get_data(three_axis_sensor_data_t *sensor_data);
-int gyroscope_get_data(three_axis_sensor_data_t *sensor_data);
-int temperature_get_data(double *sensor_data);
+void accelerometer_get_data(three_axis_sensor_data_t *sensor_data);
+void gyroscope_get_data(three_axis_sensor_data_t *sensor_data);
+void temperature_get_data(double *sensor_data);
 
 int mpu6886_device_init(void);
 void mpu6886_driver_release(void);

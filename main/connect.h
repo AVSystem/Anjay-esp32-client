@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 AVSystem <avsystem@avsystem.com>
+ * Copyright 2021-2024 AVSystem <avsystem@avsystem.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 #ifndef _CONNECT_H_
 #define _CONNECT_H_
 
-#include "esp_log.h"
-#include "esp_wifi.h"
+#include <esp_err.h>
+#include <esp_wifi.h>
 
 void wifi_initialize(void);
 esp_err_t wifi_connect(wifi_config_t *conf);
