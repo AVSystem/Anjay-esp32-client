@@ -19,7 +19,7 @@ execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --always
 if(GIT_DESCRIBE_RESULT EQUAL 0)
     string(STRIP "${CLIENT_VERSION_S}" CLIENT_VERSION)
 else()
-    set(CLIENT_VERSION "24.02")
+    set(CLIENT_VERSION "24.02.1")
 endif()
 # Input and output files are extracted from parameters.
 configure_file("${INPUT_FILE}" "${OUTPUT_FILE}" @ONLY)

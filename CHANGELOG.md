@@ -1,5 +1,10 @@
 # Changelog
 
+## 24.02.1 (February 20th, 2024)
+
+### Improvements
+- Updated Anjay version
+
 ## 24.02 (February 8th, 2024)
 
 ### Improvements
