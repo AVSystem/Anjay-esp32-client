@@ -1,5 +1,10 @@
 # Changelog
 
+## 24.05 (May 28th, 2024)
+
+### Improvements
+- Increased main task stack size to support -Og optimization
+
 ## 24.02.1 (February 20th, 2024)
 
 ### Improvements
