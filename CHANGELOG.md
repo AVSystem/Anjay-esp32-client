@@ -1,5 +1,11 @@
 # Changelog
 
+## 24.11 (November 13th, 2024)
+
+### Improvements
+- Fixed compatibility with ESP IDF v5.3,
+  support for ESP IDF in versions older than v5.0 is dropped
+
 ## 24.05 (May 28th, 2024)
 
 ### Improvements

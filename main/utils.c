@@ -15,10 +15,8 @@
  */
 
 #include <stdint.h>
-#include <string.h>
 
-#include <esp_err.h>
-#include <esp_system.h>
+#include <esp_mac.h>
 
 #include <avsystem/commons/avs_utils.h>
 
@@ -28,7 +26,7 @@ int get_device_id(device_id_t *out_id) {
     memset(out_id->value, 0, sizeof(out_id->value));
 
     uint8_t mac[6];
-    if (esp_efuse_mac_get_default(mac) != ESP_OK) {
+    if (esp_read_mac(mac, ESP_MAC_EFUSE_FACTORY) != ESP_OK) {
         return -1;
     }
 

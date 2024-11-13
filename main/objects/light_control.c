@@ -212,7 +212,7 @@ static int resource_write(anjay_t *anjay,
 
     case RID_DIMMER: {
         assert(riid == ANJAY_ID_INVALID);
-        return anjay_get_i32(ctx, &obj->instances[iid].power);
+        return anjay_get_i32(ctx, (int32_t *) &obj->instances[iid].power);
     }
 
     default:

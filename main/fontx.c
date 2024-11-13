@@ -145,7 +145,7 @@ bool GetFontx(FontxFile *fxs,
             if (fxs[i].is_ank) {
                 offset = 17 + ascii * fxs[i].fsz;
                 if (fseek(fxs[i].file, offset, SEEK_SET)) {
-                    printf("Fontx:seek(%u) failed.\n", offset);
+                    printf("Fontx:seek(%lu) failed.\n", offset);
                     return false;
                 }
                 if (fread(pGlyph, 1, fxs[i].fsz, fxs[i].file) != fxs[i].fsz) {

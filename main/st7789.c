@@ -60,6 +60,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include <rom/gpio.h>
+
 #include "sdkconfig.h"
 #include "st7789.h"
 
@@ -84,8 +86,8 @@ static const int SPI_Frequency = SPI_MASTER_FREQ_20M;
 static void delayMS(int ms) {
     int _ms = ms + (portTICK_PERIOD_MS - 1);
     TickType_t xTicksToDelay = _ms / portTICK_PERIOD_MS;
-    ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d", ms,
-             _ms, portTICK_PERIOD_MS, xTicksToDelay);
+    ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%lu xTicksToDelay=%lu", ms,
+             _ms, (uint32_t) portTICK_PERIOD_MS, xTicksToDelay);
     vTaskDelay(xTicksToDelay);
 }
 
@@ -420,7 +422,7 @@ void lcdDrawFillRect(TFT_t *dev,
     if (y2 >= dev->_height)
         y2 = dev->_height - 1;
 
-    ESP_LOGD(TAG, "offset(x)=%d offset(y)=%d", dev->_offsetx, dev->_offsety);
+    ESP_LOGD(TAG, "offset(x)=%u offset(y)=%u", dev->_offsetx, dev->_offsety);
     uint16_t _x1 = x1 + dev->_offsetx;
     uint16_t _x2 = x2 + dev->_offsetx;
     uint16_t _y1 = y1 + dev->_offsety;
@@ -705,8 +707,8 @@ void lcdDrawRoundRect(TFT_t *dev,
         y2 = temp;
     } // endif
 
-    ESP_LOGD(TAG, "x1=%d x2=%d delta=%d r=%d", x1, x2, x2 - x1, r);
-    ESP_LOGD(TAG, "y1=%d y2=%d delta=%d r=%d", y1, y2, y2 - y1, r);
+    ESP_LOGD(TAG, "x1=%u x2=%u delta=%u r=%u", x1, x2, x2 - x1, r);
+    ESP_LOGD(TAG, "y1=%u y2=%u delta=%u r=%u", y1, y2, y2 - y1, r);
     if (x2 - x1 < r)
         return; // Add 20190517
     if (y2 - y1 < r)
@@ -729,10 +731,10 @@ void lcdDrawRoundRect(TFT_t *dev,
             err += ++y * 2 + 1;
     } while (y < 0);
 
-    ESP_LOGD(TAG, "x1+r=%d x2-r=%d", x1 + r, x2 - r);
+    ESP_LOGD(TAG, "x1+r=%u x2-r=%u", x1 + r, x2 - r);
     lcdDrawLine(dev, x1 + r, y1, x2 - r, y1, color);
     lcdDrawLine(dev, x1 + r, y2, x2 - r, y2, color);
-    ESP_LOGD(TAG, "y1+r=%d y2-r=%d", y1 + r, y2 - r);
+    ESP_LOGD(TAG, "y1+r=%u y2-r=%u", y1 + r, y2 - r);
     lcdDrawLine(dev, x1, y1 + r, x1, y2 - r, color);
     lcdDrawLine(dev, x2, y1 + r, x2, y2 - r, color);
 }

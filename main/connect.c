@@ -203,7 +203,7 @@ static esp_err_t connect(wifi_config_t *conf) {
     esp_netif_t *netif = NULL;
     esp_netif_ip_info_t ip;
     for (int i = 0; i < esp_netif_get_nr_of_ifs(); ++i) {
-        netif = esp_netif_next(netif);
+        netif = esp_netif_next_unsafe(netif);
         if (is_our_netif(TAG, netif)) {
             ESP_LOGI(TAG, "Connected to %s", esp_netif_get_desc(netif));
             ESP_ERROR_CHECK(esp_netif_get_ip_info(netif, &ip));

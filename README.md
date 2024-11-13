@@ -18,8 +18,8 @@ The following LwM2M Objects are supported:
 | M5StickC-Plus  | Push button (/3347)<br>Light control (/3311)<br>Temperature sensor (/3303)<br>Accelerometer (/3313)<br>Gyroscope (/3343)
 
 ## Compiling and launching
-1. Install ESP-IDF and its dependencies on your computer. Please follow the instructions at https://docs.espressif.com/projects/esp-idf/en/v4.4.5/esp32/get-started/index.html up to and including the point where you call `. $HOME/esp/esp-idf/export.sh`
-   * The project has been tested with ESP-IDF v4.4.5, but may work with other versions as well.
+1. Install ESP-IDF and its dependencies on your computer. Please follow the instructions at https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/get-started/index.html including `Manual Installation` up to the `Start a Project` subtitle.
+   * The project has been tested with ESP-IDF v5.3.1, but may work with other v5.x.x versions as well. Older versions are not supported.
 1. Clone the repository `git clone https://github.com/AVSystem/Anjay-esp32-client.git` and navigate to project directory
 1. Initialize and update submodules with `git submodule update --init --recursive`
 1. Run `idf.py set-target esp32` in the project directory
