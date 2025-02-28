@@ -1,5 +1,10 @@
 # Changelog
 
+## 25.02 (February 28th, 2025)
+
+### Improvements
+- Updated Anjay and Anjay-esp-idf version
+
 ## 24.11 (November 13th, 2024)
 
 ### Improvements
