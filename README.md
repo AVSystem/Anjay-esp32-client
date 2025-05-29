@@ -1,4 +1,13 @@
 # Anjay ESP32 Client
+
+## ⚠️ Archived Repository
+
+**This repository is no longer actively maintained by the team. It is provided as is for reference purposes only.**
+**We do not accept issues, pull requests, or provide support.**
+**If you are still interested in this project or have questions, feel free to contact us. https://avsystem.com/contact/**
+
+---
+
 ## Overview
 This repository contains a LwM2M Client application example for ESP32 devices, based on open-source [Anjay-esp-idf](https://github.com/AVSystem/Anjay-esp-idf) component and [Espressif IoT Development Framework](https://github.com/espressif/esp-idf).
 
