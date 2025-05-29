@@ -1,5 +1,12 @@
 # Changelog
 
+## 25.05 (May 29th, 2025)
+
+### Discontinued the project
+
+### Improvements
+- Updated Anjay, Anjay-esp-idf version and license NOTICE file
+
 ## 25.02 (February 28th, 2025)
 
 ### Improvements
